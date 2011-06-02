@@ -1,0 +1,15 @@
+Installation guide
+==========================
+
+==Requirements==
+clusterPy requires [http://numpy.scipy.org/ numpy] and Python 2.x (2.6 or later)
+
+==Executable installers==
+If you are using Mac OS X or Windows, you can simply download the respective executable installer (either a .exe or .mpkg file) and follow the instructions on screen.
+
+==Source installation==
+You can also download the source installation. Extract it in a directory, navigate to it and execute
+
+`python setup.py install`
+
+You may need administrator privileges (or execute the command as root) for this to work.
