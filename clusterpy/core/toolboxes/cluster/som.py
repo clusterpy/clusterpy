@@ -41,7 +41,7 @@ def originalSOM(y,w,
 
     The original algorithm is commonly used with the output network layer
     represented by a regular hexagonal or rectangular lattice. In clusterPy we
-    use a rectangular regular lattice. Finally, the adaptative parameter is
+    use a rectangular regular lattice (see [Schimidt_Rey_Skupin2010]_ for the effects of using different output layer topologies in SOM). Finally, the adaptative parameter is
     taken from the scalar version suggested by [Kohonen1990].
 
     Additionaly In ClusterPy we use contiguity based neighbourhood for the

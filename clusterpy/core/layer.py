@@ -582,7 +582,7 @@ Name followed by = signal followed by the fieldOperations")
 
         The available algorithms are:
 
-        * Arisel [Duque_Church2004]_: 
+        * Arisel [Duque_Church2004]_, [Duque_Church_Middleton2011]_: 
             * :ref:`Arisel description <arisel_description>`.
             * :ref:`Using Arisel with clusterPy <arisel_examples>`.
 
