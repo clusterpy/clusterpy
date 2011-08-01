@@ -8,7 +8,8 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 __all__ = ['Layer', 'new', 'load', 'importArcData', 'createGrid',
-           'createPoints','importShape','importCSV','importDBF']
+           'createPoints','importShape','importCSV','importDBF',
+           'importGWT']
 
 from inputs import *
 from layer import Layer

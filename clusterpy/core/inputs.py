@@ -7,12 +7,14 @@ __license__ = "GPL"
 __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
-__all__ = ['new','load','importArcData','createPoints','createGrid','importDBF','importCSV','importShape']
+__all__ = ['new','load','importArcData','createPoints','createGrid','importDBF','importCSV','importShape','importGWT']
     
 import struct
 import cPickle
+import re
 from componentsIO import WfromPolig 
 from layer import Layer
+
 
 # INDEX
 # new
@@ -26,6 +28,7 @@ from layer import Layer
 # readPolylines
 # readPolygons
 # importDBF
+# importGWT
 
 
 def new():
@@ -568,3 +571,42 @@ def importCSV(filename,header=True):
                     appY.append(x)
             Y[i] = appY
     return (Y, fieldnames)
+
+
+def importGWT(filename,initialId=1):
+    """Get the a neighborhood structure from a GWT file.
+    
+    :param filename: name of the file (String)
+    :type filename: string
+    :param initialId: First id of the areas.
+    :type initialId: integer 
+
+    :rtype: contiguity dictionary.
+
+    **Example 1** Storing a GWT neighborhood structure into a layer
+    object::
+
+        import clusterpy
+        china = clusterpy.importArcData("clusterpy/data_examples/china")
+        china.customW = clusterpy.importGWT("clusterpy/data_examples/china_gwt_658.193052.gwt")
+
+    """
+    finp = open(filename)
+    finp.readline()
+    w = {}
+    reg = re.compile(r"(\d+)\s(\d+)\s+(\d+.\d*)")
+    for line in finp:
+        items = reg.match(line.strip())
+        if items:
+            id = int(items.group(1))
+            neigh = int(items.group(2))
+            if w.has_key(id - initialId):
+                w[id - initialId].append(neigh - initialId)
+            else:
+                w[id - initialId] = [neigh - initialId]
+        else:
+            raise NameError("File structure is not from a GWT file")
+    return w        
+
+
+    

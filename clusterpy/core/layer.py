@@ -66,6 +66,7 @@ from outputs import csvWriter
 # Layer.exportDBFY
 # Layer.exportCSVY
 # Layer.exportCPY
+# Layer.exportGALW
 # Layer.exportCSVW
 # Layer.exportCPW
 # Layer.exportOutputs
@@ -1331,6 +1332,71 @@ algorithm"
         cPickle.dump(Y, yf)
         print "Done"
 
+    def exportGALW(self, fileName, wtype='rook', idVariable='ID'):
+        """        
+        Exports the contiguity W matrix on a gal file
+
+        :param fileName: gal file name to create, without ".gal"
+        :type fileName: string 
+        :keyword wtype: w type to export, default is 'rook'
+        :type wtype: string 
+        :keyword idVariable: id variable fieldName, default is 'ID'
+        :type idVariable: string  
+
+        **Example 1**        
+        Exporting rook matrix  ::
+
+            import clusterpy
+            china = clusterpy.importArcData("clusterpy/data_examples/china")
+            china.exportGALW("chinaW", wtype='rook')
+
+        **Example 2**        
+        Exporting queen matrix  ::
+
+            import clusterpy
+            china = clusterpy.importArcData("clusterpy/data_examples/china")
+            china.exportGALW("chinaW", wtype='queen')
+
+        **Example 3**        
+        Exporting queen matrix based on a variable different from ID  ::
+
+            import clusterpy
+            california = clusterpy.importArcData("clusterpy/data_examples/CA_Polygons")
+            california.exportGALW("californiaW", wtype='queen',idVariable="MYID")
+
+        **Example 3**        
+        Exporting a customW matrix imported from a GWT file::
+
+            import clusterpy
+            china = clusterpy.importArcData("clusterpy/data_examples/china")
+            china.customW = clusterpy.importGWT("clusterpy/data_examples/china_gwt_658.193052")
+            china.exportGALW("chinaW", wtype='custom')
+        """
+        print "Writing GAL file"
+        if wtype == 'rook':
+            nw = self.Wrook
+        elif wtype == 'queen':
+            nw = self.Wqueen
+        elif wtype == 'custom':
+            nw = self.customW
+        else:
+            raise NameError("W type is not valid")
+        vars = self.getVars(idVariable)
+        fout = open(fileName + ".gal","w")
+        fout.write("".join(["0 ",str(len(vars))," ",fileName," ",idVariable,"\n"]))
+        for id in nw:
+            numberOfNeighbs = len(nw[id])
+            line = "".join([str(int(vars[id][0]))," ",str(int(numberOfNeighbs)),"\n"])
+            fout.write(line)
+            line = []
+            for n in nw[id]:
+                line.append(str(int(vars[n][0])) + " ")
+            line = "".join(line + ["\n"])  
+            fout.write(line)
+        print "GAL successfully created"
+        fout.close()
+        
+
     def exportCSVW(self, fileName, wtype='rook', idVariable='ID', grade=1, diag=1, standarize=False):
         """        
         Exports the nth contiguity W matrix on a csv file
@@ -1362,10 +1428,14 @@ algorithm"
             china.exportCSVW("chinaW", wtype='rook', grade=2)
         """
         print "Writing CSV file"
-        if type == 'rook':
+        if wtype == 'rook':
             nw = copy.deepcopy(self.Wrook)
-        else:
+        elif wtype == 'queen':
             nw = copy.deepcopy(self.Wqueen)
+        elif wtype == 'custom':
+            nw = copy.deepcopy(self.customW)
+        else:
+            raise NameError("W type is not valid")
         w = copy.deepcopy(nw)
         vars = self.getVars(idVariable)
         fieldNames = [str(vars[x][0]) for x in vars]
@@ -1409,9 +1479,13 @@ algorithm"
         """
         print "Writing CP file"
         if wtype == 'rook':
-            W = self.Wrook
+            nw = copy.deepcopy(self.Wrook)
         elif wtype == 'queen':
-            W = self.Wqueen
+            nw = copy.deepcopy(self.Wqueen)
+        elif wtype == 'custom':
+            nw = copy.deepcopy(self.customW)
+        else:
+            raise NameError("W type is not valid")
         wf = open(filename + '.cp', 'w')
         cPickle.dump(W, wf)
         print "CP file successfully created"
