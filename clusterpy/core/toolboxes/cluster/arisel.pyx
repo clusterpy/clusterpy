@@ -13,12 +13,12 @@ import time as tm
 from componentsAlg import AreaManager
 from componentsAlg import ExtendedMemory
 from componentsAlg import RegionMaker
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Pool
 
 __all__ = ['execArisel']
 
 def constructPossible(am, pRegions, initialSolution, distanceType, distanceStat,
-                      selectionType, objectiveFunctionType, par_queue):
+                      selectionType, objectiveFunctionType):
 
     rm = RegionMaker(am, pRegions,
                      initialSolution=initialSolution,
@@ -26,7 +26,8 @@ def constructPossible(am, pRegions, initialSolution, distanceType, distanceStat,
                      distanceStat=distanceStat,
                      selectionType=selectionType,
                      objectiveFunctionType=objectiveFunctionType)
-    par_queue.put(rm)
+    return rm
+#    par_queue.put(rm)
 
 
 def execArisel(y, w, unsigned int pRegions, unsigned int inits=3, list initialSolution=[], unsigned int convTabu=0, unsigned int  tabuLength=10):
@@ -122,24 +123,24 @@ def execArisel(y, w, unsigned int pRegions, unsigned int inits=3, list initialSo
     am = AreaManager(w, y, distanceType)
     extendedMemory = ExtendedMemory() 
 
+    pool = Pool(processes = 16)
     procs = []
+
+    start = tm.time()    
+    for j in xrange(inits):
+        ans = pool.apply_async(constructPossible, [am, pRegions,
+                                                   initialSolution,
+                                                   distanceType,
+                                                   distanceStat,
+                                                   selectionType,
+                                                   objectiveFunctionType])
+        procs.append(ans)
+
+
     results = []
-    par_queue = Queue()
-    start = tm.time()
-    
-    for i in range(inits):
-        p = Process(target=constructPossible,
-                    args=([am, pRegions, initialSolution, distanceType, distanceStat,
-                           selectionType, objectiveFunctionType, par_queue]))
-        procs.append(p)
-        p.start()
-
-    for i in range(inits):
-        results.append(par_queue.get())
-
     for p in procs:
-        p.join()
-
+        results.append(p.get())
+            
     #  EVALUATE SOLUTION
     tmp_ans = extendedMemory
     for rm in results:
@@ -148,7 +149,6 @@ def execArisel(y, w, unsigned int pRegions, unsigned int inits=3, list initialSo
             
     rm = tmp_ans
     extendedMemory.updateExtendedMemory(rm)
-            
 
     # extendedMemoryObjInfo = extendedMemory.objInfo
     # for i in range(inits):
