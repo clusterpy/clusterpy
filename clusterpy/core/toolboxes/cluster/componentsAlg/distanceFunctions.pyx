@@ -12,7 +12,7 @@ __email__ = "contacto@rise-group.org"
 import numpy
 cimport numpy
 
-def square_double(list x):
+cdef double square_double(list x):
     cdef double i, ans = 0.0
     for i in x:
         ans += i*i
