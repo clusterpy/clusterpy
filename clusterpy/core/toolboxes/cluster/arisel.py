@@ -106,6 +106,7 @@ def execArisel(y, w, pRegions, inits=3, initialSolution=[], convTabu=0, tabuLeng
     am = AreaManager(w, y, distanceType)
     start = tm.time()
     extendedMemory = ExtendedMemory() 
+
     for i in range(inits):
 
         #  CONSTRUCTION
@@ -121,6 +122,10 @@ def execArisel(y, w, pRegions, inits=3, initialSolution=[], convTabu=0, tabuLeng
 
         if rm.objInfo < extendedMemory.objInfo:
             extendedMemory.updateExtendedMemory(rm)
+    
+
+    #END MPI (BARRIER)
+
     time1 = tm.time() - start
 
     #  LOCAL SEARCH (with Tabu search)

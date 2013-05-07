@@ -1,9 +1,22 @@
 # encoding: latin2
 print "ClusterPy: Library of spatially constrained clustering algorithms"
+try:
+    import Polygon
+except:
+    pass
+    print "Irregular maps creator is not available because Polygon is not installed"
+
+try:
+    import scipy
+except:
+    pass
+    print "Irregular maps creator is not available because scipy is not installed"
+
 
 from core import *
+from core import contiguity
 
-__all__ = ['Layer','new','load','importArcData','createGrid',
+__all__ = ['rimap','Layer','new','load','importArcData','createGrid',
            'createPoints','importShape','importDBF','importCSV','CPhelp']
 __author__ = "Juan C. Duque (Owner), Boris Dev, Alejandro Betancourt, Jose L. Franco, Andres Cano"
 __credits__ = "Copyright (c) 2010-11 Juan C. Duque"

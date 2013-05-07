@@ -7,13 +7,15 @@ __license__ = "GPL"
 __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
-__all__ = ['new','load','importArcData','createPoints','createGrid','importDBF','importCSV','importShape','importGWT']
+__all__ = ['new','load','importArcData','createPoints','createHexagonalGrid',
+           'createGrid','importDBF','importCSV','importShape','importGWT','rimap']
     
 import struct
 import cPickle
 import re
-from componentsIO import WfromPolig 
+from contiguity import weightsFromAreas
 from layer import Layer
+#from toolboxes import rimap as rim
 
 
 # INDEX
@@ -30,6 +32,47 @@ from layer import Layer
 # importDBF
 # importGWT
 
+def rimap(n,N=30,alpha=[0.1,0.5],sigma=[1.2,1.5],dt=0.1,pg=0.1653,pu=0.4116,su=0.3997,boundary=""):
+    """Creates an irregular maps
+
+    :param n: number of areas 
+    :type n: integer
+    :param N: number of points sampled from each irregular polygon (MR-Polygon) 
+    :type N: integer
+    :param alpha: min and max value to sampled alpha; default is (0.1,0.5)
+    :type alpha: List
+    :param sigma: min and max value to sampled sigma; default is (1.2,1.5)
+    :type sigma: List
+    :param dt: time delta to be used to create irregular polygons (MR-Polygons)
+    :type dt: Float
+    :param pg: parameter to define the scaling factor of each polygon before being introduced as part of the irregular map
+    :type pg: Float
+    :param pu: parameter to define the probability of increase the number of areas of each polygon before being introduced into the irregular map
+    :type pu: Float
+    :param su: parameter to define how much is increased the number of areas of each polygon before being introduced into the irregular map
+    :type su: Float
+    :param boundary: Initial irregular boundary to be used into the recursive irregular map algorithm
+    :type boundary: Layer
+
+    :rtype: Layer
+    :return: RI-Map instance 
+    """
+
+    rm = rim(n,N,alpha,sigma,dt,pg,pu,su,boundary)
+    areas = rm.carteAreas
+    areas = fixIntersections(areas)
+    Wqueen,Wrook, = weightsFromAreas(areas)
+    layer = Layer()
+    layer.areas = areas
+    layer.Wqueen = Wqueen
+    layer.Wrook = Wrook
+    layer.shpType = 'polygon'
+    layer.name = "rimap_" + str(len(areas))
+    layer.fieldNames = ["Id","nw"]
+    layer.Y = {}
+    for i in Wrook:
+        layer.Y[i] = [i,len(Wrook[i])]
+    return layer
 
 def new():
     """Creates an empty Layer
@@ -113,9 +156,8 @@ def importArcData(filename):
             data[y] = [y] + data[y]
     layer.fieldNames = fields
     layer.Y = data
-    layer.areas, layer.Wqueen, layer.Wrook = importShape(filename + '.shp')
+    layer.areas, layer.Wqueen, layer.Wrook, layer.shpType = importShape(filename + '.shp')
     layer._defBbox()
-    layer.shpType = 'polygon'
     print "Done"
     return layer
 
@@ -191,7 +233,77 @@ def createPoints(nRows, nCols, lowerLeft=(0,0), upperRight=(100,100)):
     print "Done"
     return layer
 
-def createGrid(nRows, nCols, lowerLeft=(0,0), upperRight=(100,100)):
+def createHexagonalGrid(nRows, nCols, lowerLeft=(0,0), upperRight=(100,100)):
+    """Creates a new Layer with a hexagonal regular lattice
+    
+    :param nRows: number of rows
+    :type nRows: integer
+    :param nCols: number of columns
+    :type nCols: integer
+    :type lowerLeft: tuple or none, lower-left corner coordinates; default is (0,0) 
+    :type upperRight: tuple or none, upper-right corner coordinates; default is (100,100)
+    :rtype: Layer new lattice 
+
+    **Description**
+
+    Regular lattices are widely used in both theoretical and empirical
+    applications in Regional Science. The example below shows how easy 
+    the creation of this kind of maps is using clusterPy.
+    
+    **Examples**
+
+    Create a grid of ten by ten points.::
+
+        import clusterpy
+        points = clusterpy.createGrid(10,10)
+    
+
+    Create a grid of ten by ten points on the bounding box (0,0,100,100).::
+
+        import clusterpy
+        points = clusterpy.createGrid(10, 10, lowerLeft=(0, 0), upperRight=(100, 100))
+    """
+    print "Creating grid"
+    rowHeight = (upperRight[1] - lowerLeft[1])/float(nRows)
+    colStep = rowHeight/float(2)
+    N = nRows*nCols
+    areas = []
+    for row in range(nRows):
+        actx = lowerLeft[0]
+        for col in range(nCols):
+            if col != 0:
+                actx += 2*colStep
+            if col%2 == 1:
+                y0 = lowerLeft[1] + rowHeight*row - 2*rowHeight/float(2)
+                y1 = lowerLeft[1] + rowHeight*row - rowHeight/float(2)
+                y2 = lowerLeft[1] + rowHeight*row
+            else:
+                y0 = lowerLeft[1] + rowHeight*row - rowHeight/float(2)
+                y1 = lowerLeft[1] + rowHeight*row
+                y2 = lowerLeft[1] + rowHeight*row + rowHeight/float(2)
+            x0 = actx
+            x1 = actx + colStep
+            x2 = actx + 2*colStep
+            x3 = actx + 3*colStep
+            pol = [(x0,y1),(x1,y2),(x2,y2),
+                   (x3,y1),(x2,y0),(x1,y0),
+                   (x0,y1)]
+            areas.append([pol])
+    Y = {}
+    for i in range(N):
+        Y[i]=[i]
+    layer = Layer()
+    layer.Y = Y
+    layer.fieldNames = ['ID']
+    layer.areas = areas
+    layer.Wqueen, layer.Wrook, = weightsFromAreas(layer.areas)
+    layer.shpType = 'polygon'
+    layer.name = 'root'
+    layer._defBbox()
+    print "Done"
+    return layer
+
+def createGrid(nRows, nCols, lowerLeft=None, upperRight=None):
     """Creates a new Layer with a regular lattice
     
     :param nRows: number of rows
@@ -222,14 +334,22 @@ def createGrid(nRows, nCols, lowerLeft=(0,0), upperRight=(100,100)):
         points = clusterpy.createGrid(10, 10, lowerLeft=(0, 0), upperRight=(100, 100))
     """
     print "Creating grid"
-    ymin = lowerLeft[1]
-    ymax = upperRight[1]
-    xmin = lowerLeft[0]
-    xmax = upperRight[0]
+    if lowerLeft != None and upperRight != None:
+        ymin = lowerLeft[1]
+        ymax = upperRight[1]
+        xmin = lowerLeft[0]
+        xmax = upperRight[0]
+        areaHeight = float(ymax - ymin) / nRows
+        areaWidth = float(xmax - xmin) / nCols
+    else:
+        ymin = 0
+        xmin = 0
+        xmax = 10*nCols
+        ymax = 10*nRows
+        areaHeight = 10
+        areaWidth = 10
     nyPoints = nRows
     nxPoints = nCols
-    areaHeight = float(ymax - ymin) / nRows
-    areaWidth = float(xmax - xmin) / nCols
     N = nyPoints*nxPoints
     Y = {}
     acty = ymax
@@ -297,7 +417,7 @@ def createGrid(nRows, nCols, lowerLeft=(0,0), upperRight=(100,100)):
     layer.areas = map
     layer.Wrook = wr
     layer.Wqueen = wq
-    layer.Wqueen, layer.Wrook, = WfromPolig(layer.areas)
+    layer.Wqueen, layer.Wrook, = weightsFromAreas(layer.areas)
     layer.shpType = 'polygon'
     layer.name = 'root'
     layer._defBbox()
@@ -320,7 +440,7 @@ def importShape(shapefile):
 
     INFO, areas = readShape(shapefile)
     if INFO['type'] == 5:
-        Wqueen, Wrook = WfromPolig(areas)
+        Wqueen, Wrook = weightsFromAreas(areas)
         shpType = 'polygon'
     elif INFO['type'] == 3:
         shpType = 'line'
@@ -330,7 +450,7 @@ def importShape(shapefile):
         shpType = 'point'
         Wrook = {}
         Wqueen = {}
-    return areas, Wqueen, Wrook
+    return areas, Wqueen, Wrook, shpType
 
 def readShape(filename):
     """ This function automatically detects the type of the shape and then reads an ESRI shapefile of polygons, polylines or points.
@@ -348,6 +468,7 @@ def readShape(filename):
         INFO, areas = readPolylines(fileObj)
     elif shtype == 5: #Polygon
         INFO, areas = readPolygons(fileObj)
+    fileObj.close()
     return INFO, areas
 
 def readPoints(bodyBytes):
@@ -507,7 +628,7 @@ def importDBF(filename):
         start = 0
         first = 0
         Y[nrec] = []
-        for field in fieldSpecs:
+        for nf, field in enumerate(fieldSpecs):
             l = field[1] + 1
             dec = field[2]
             end = start + l + first
@@ -528,7 +649,7 @@ def importDBF(filename):
             Y[nrec] += [value]
     return (Y, fieldNames, fieldSpecs)
 
-def importCSV(filename,header=True):
+def importCSV(filename,header=True,delimiter=","):
     """Get variables from a csv file.
     
     :param filename: name of the file (String)
@@ -544,7 +665,7 @@ def importCSV(filename,header=True):
         chinaData = clusterpy.importCSV("clusterpy/data_examples/china.csv")
     """
     f = open(filename)
-    fields = [c[:-1].strip().rsplit(',') for c in f.readlines()]
+    fields = [c[:-1].strip().rsplit(delimiter) for c in f.readlines()]
     f.close()
     if fields[-1][0] == "":
         fields = fields[:-1]
@@ -571,6 +692,7 @@ def importCSV(filename,header=True):
                     appY.append(x)
             Y[i] = appY
     return (Y, fieldnames)
+
 
 
 def importGWT(filename,initialId=1):

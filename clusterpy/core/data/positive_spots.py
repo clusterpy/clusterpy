@@ -1,5 +1,5 @@
 # encoding: latin2
-"""Spots data module 
+"""Positive spots data module 
 """
 __author__ = "Juan C. Duque, Alejandro Betancourt, Jose L. Franco"
 __credits__ = "Copyright (c) 2010-11 Juan C. Duque"
@@ -12,9 +12,9 @@ __all__ = ['generateSpots']
 import copy
 import numpy
 
-def generateSpots(w, nc=4, compact=0.9, Zalpha=2.1):
+def generatePositiveSpots(w, nc=4, compact=0.9, Zalpha=2.32):
     """
-    This function generates a set of data with simulated clusters of atypical features. See more details on this process in: Duque JC, Aldstadt J, Velasquez E, Franco JL, Betancourt A (2010). A computationally efficient method for delineating irregularly shaped spatial clusters. I{Journal of Geographical Systems}, forthcoming. DOI: 10.1007/s10109-010-0137-1.
+    This function generates a set of data with simulated clusters of atypical possitive features. See more details on this process in: Duque JC, Aldstadt J, Velasquez E, Franco JL, Betancourt A (2010). A computationally efficient method for delineating irregularly shaped spatial clusters. I{Journal of Geographical Systems}, forthcoming. DOI: 10.1007/s10109-010-0137-1.
     
     :param w: contiguity matrix
     :type w: dictionary
@@ -29,18 +29,18 @@ def generateSpots(w, nc=4, compact=0.9, Zalpha=2.1):
     **Example** 
 
     Generating a float Spot process on China each with 4 clusters,
-    and compactness level of 0.7 and an Zalpha value of 1.28(alpha=0.9)
+    and compactness level of 0.7 and an Zalpha value of 1.64
 
     >>> import clusterpy
     >>> china = clusterpy.importArcData("clusterpy/data_examples/china")
-    >>> china.generateData("Spots", 'queen', 1, 4, 0.7, 1.28)
+    >>> china.generateData("positive_spots", 'queen', 1, 4, 0.7, 1.64)
 
     Generating an integer Spot process on China each with 4 clusters,
-    and compactness level of 0.7 and an alpha value of 1.28(alpha=0.9)
+    and compactness level of 0.7 and an alpha value of 1.64
 
     >>> import clusterpy
     >>> china = clusterpy.importArcData("clusterpy/data_examples/china")
-    >>> china.generateData("Spots", 'queen', 1, 4, 0.7, 1.28, integer=1)
+    >>> china.generateData("positive_spots", 'queen', 1, 4, 0.7, 1.64, integer=1)
     """
     y = {}
     N = len(w.keys())
@@ -51,21 +51,15 @@ def generateSpots(w, nc=4, compact=0.9, Zalpha=2.1):
     NegAreas = []
     avAreas = []
     for i  in xrange(10000): # this cycle creates and classifies the N random numbers
-        num = numpy.random.randn()
+        num = abs(numpy.random.randn())
         if num > Zalpha:
             PosAreas.append(num)
             avAreas.append(num)
             posAreaNumber = posAreaNumber + 1
             avAreaNumber = avAreaNumber + 1
         else:
-            if num <-Zalpha:
-                NegAreas.append(num)
-                avAreas.append(num)
-                negAreaNumber = negAreaNumber + 1
-                avAreaNumber = avAreaNumber + 1
-            else:
-                avAreas.append(num)
-                avAreaNumber = avAreaNumber + 1
+            avAreas.append(num)
+            avAreaNumber = avAreaNumber + 1
     AN = numpy.zeros(nc)
     NoClusters = numpy.floor(1 * N)
     sum = 0
@@ -133,27 +127,17 @@ def generateSpots(w, nc=4, compact=0.9, Zalpha=2.1):
         except: # If can not create the clusters repeat the process.
             allAddedAreas = copy.deepcopy(savedAllAddedAreas)
             LA = copy.deepcopy(savedLA)
-    NPC = numpy.ceil(nc / 2.0)
-    NNC = nc - NPC
+    NPC = nc
     NPA = 0
-    NNA = 0
     for i in range(nc): # Calculating the number of areas in each cluster
-            if i < NPC:
-                    NPA = NPA + len(listOfClusterAreas[i][0])
-            else:
-                    NNA = NNA + len(listOfClusterAreas[i][0])
+        NPA = NPA + len(listOfClusterAreas[i][0])
     posAreaCounter = 0
     negAreaCounter = 0
     avAreaCounter = 0
     for i in range(nc): # For all the clusters
-            if i < NPC: # If is negative
-                    for x in listOfClusterAreas[i][0]:
-                            y[x] = [PosAreas[numpy.random.randint(0, posAreaNumber)]]
-                            posAreaCounter = posAreaCounter + 1
-            else: # If is positive
-                    for x in listOfClusterAreas[i][0]:
-                            y[x] = [NegAreas[numpy.random.randint(0, negAreaNumber)]]
-                            negAreaCounter = negAreaCounter + 1
+        for x in listOfClusterAreas[i][0]:
+            y[x] = [PosAreas[numpy.random.randint(0, posAreaNumber)]]
+            posAreaCounter = posAreaCounter + 1
     for i in range(N): #if is an average cluster
         if i not in y:
             y[i] = [avAreas[numpy.random.randint(0, avAreaNumber)]]

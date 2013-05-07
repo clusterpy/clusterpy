@@ -1,0 +1,1 @@
+PROJCS["sigame",GEOGCS["GCS_Bogota",DATUM["D_Bogota",SPHEROID["International_1924",6378388.0,297.0]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Azimuthal_Equidistant"],PARAMETER["False_Easting",835376.44],PARAMETER["False_Northing",1180809.75],PARAMETER["Central_Meridian",-75.56826444],PARAMETER["Latitude_Of_Origin",6.231971667],UNIT["Meter",1.0]]

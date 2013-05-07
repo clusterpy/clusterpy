@@ -16,4 +16,6 @@ from lBinomial import generateLBinomial
 from sar import generateSAR
 from sma import generateSMA
 from spots import generateSpots
+from positive_spots import generatePositiveSpots
 from uniform import generateUniform
+from spatialLag import spatialLag
