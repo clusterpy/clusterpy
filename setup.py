@@ -21,11 +21,13 @@ setup(
         author_email='software@rise-group.org',
         url='http://www.rise-group.org/section/Software/clusterPy/',
         packages=['clusterpy','clusterpy.core','clusterpy.core.data',
-            'clusterpy.core.geometry','clusterpy.core.toolboxes',
+                  'clusterpy.core.geometry','clusterpy.core.toolboxes',
                   'clusterpy.core.toolboxes.cluster',
                   'clusterpy.core.toolboxes.cluster.componentsAlg'],
-        
-        ext_modules = [Extension(CLUSPKG+"arisel", [CLUSPATH+"arisel.pyx"]),
+        ext_modules = [Extension(CLUSPKG+"arisel", [CLUSPATH+"arisel.pyx"],
+                                 extra_link_args=['-fopenmp'],
+                                 extra_compile_args=['-fopenmp']
+                                 ),
                        Extension(ALGPKG+"distanceFunctions", [ALGPATH+"distanceFunctions.pyx"]),
 		       Extension(ALGPKG+"dist2Regions", [ALGPATH+"dist2Regions.pyx"]),
 		       Extension(ALGPKG+"selectionTypeFunctions", [ALGPATH+"selectionTypeFunctions.pyx"]),
