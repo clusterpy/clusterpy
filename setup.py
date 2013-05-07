@@ -7,6 +7,9 @@ import numpy
 ALGPATH = "clusterpy/core/toolboxes/cluster/componentsAlg/"
 ALGPKG = "clusterpy.core.toolboxes.cluster.componentsAlg."
 
+CLUSPATH = "clusterpy/core/toolboxes/cluster/"
+CLUSPKG = "clusterpy.core.toolboxes.cluster."
+
 
 setup(
         name='clusterPy',
@@ -22,7 +25,10 @@ setup(
                   'clusterpy.core.toolboxes.cluster',
                   'clusterpy.core.toolboxes.cluster.componentsAlg'],
         
-        ext_modules = [Extension(ALGPKG+"distanceFunctions", [ALGPATH+"distanceFunctions.pyx"]),
+        ext_modules = [Extension(CLUSPKG+"arisel", [CLUSPATH+"arisel.pyx"]),
+                       Extension(ALGPKG+"distanceFunctions", [ALGPATH+"distanceFunctions.pyx"]),
+		       Extension(ALGPKG+"dist2Regions", [ALGPATH+"dist2Regions.pyx"]),
+		       Extension(ALGPKG+"selectionTypeFunctions", [ALGPATH+"selectionTypeFunctions.pyx"]),
                        Extension(ALGPKG+"init", [ALGPATH+"init.pyx"]),
                        Extension(ALGPKG+"objFunctions", [ALGPATH+"objFunctions.pyx"])
                        ],

@@ -1,4 +1,5 @@
 # encoding: latin2
+# cython: profile=True
 """Algorithm utilities
 G{packagetree core}
 """
@@ -15,6 +16,7 @@ import dist2Regions
 import objFunctions
 import distanceFunctions
 import selectionTypeFunctions
+from os import getpid
 
 class AreaManager:
     """
@@ -103,10 +105,10 @@ class AreaManager:
         Returns the distance from an area to a region (defined as a list of
         area IDs)
         """
-        if isinstance(distanceStat,str):
+        if isinstance(distanceStat, str):
             if len(indexData) == 0:
                 indexData = range(len(area.data))
-            return self.distanceStatDispatcher[distanceStat](self,area, areaList, indexData)
+            return self.distanceStatDispatcher[distanceStat](self, area, areaList, indexData)
         else:
             distance = 0.0
             i = 0
@@ -117,9 +119,9 @@ class AreaManager:
                     indexDataDS = indexData[i]
                 if len(weights) > 0:
                     distance += weights[i]
-                    self.distanceStatDispatcher[dS](self,area, areaList, indexDataDS)
+                    self.distanceStatDispatcher[dS](self, area, areaList, indexDataDS)
                 else:
-                    distance += self.distanceStatDispatcher[dS](self,area, areaList, indexDataDS)
+                    distance += self.distanceStatDispatcher[dS](self, area, areaList, indexDataDS)
                 i += 1
             return distance
    
@@ -140,7 +142,9 @@ class AreaManager:
         """
         Checks feasibility of a candidate solution
         """
-        n = len(solution)
+        cdef list emptyList
+        cdef unsigned int n = len(solution), i, r
+        cdef int feasible
         regions = {}
         for i in range(n):
             try:
@@ -153,9 +157,17 @@ class AreaManager:
             newRegion = set([])
             areas2Eval = regions[i]
             if len(areas2Eval) > 1:
+
+                emptyList = []
                 for area in areas2Eval:
-                    newRegion = newRegion | (set(self.areas[area].neighs) & set(areas2Eval))
-                if set(areas2Eval) -newRegion != set([]):
+                    emptyList.extend(self.areas[area].neighs)
+
+#                for area in areas2Eval:
+#                    newRegion = newRegion | (set(self.areas[area].neighs) & set(areas2Eval))
+#                newRegion = set(emptyList) & set(areas2Eval)
+                    #newRegion = newRegion | (set() & set(areas2Eval))
+
+                if set(areas2Eval) - set(emptyList):
                     feasible = 0
                     break
         return feasible
@@ -222,6 +234,8 @@ class ExtendedMemory(BasicMemory):
         self.region2Area = rm.region2Area
         self.intraBorderingAreas = rm.intraBorderingAreas
 
+cachedObj = {}
+cachedFeasible = {}
 class RegionMaker:
     """
     This class deals with a large amount of methods required during both the
@@ -229,19 +243,19 @@ class RegionMaker:
     coordinate them during the solution process. It also send information to
     Memory when needed.
     """
-    def __init__(self, am, pRegions=2, initialSolution=[], 
-            seedSelection = "kmeans",
-            distanceType = "EuclideanSquared", 
-            distanceStat = "Centroid",
-            selectionType = "Minimum",
-            alpha = 0.2,
-            numRegionsType = "Exogenous",
-            objectiveFunctionType = "SS",
-            threshold = 0.0,
-            weightsDistanceStat = [],
-            weightsObjectiveFunctionType = [],
-            indexDataStat = [],
-            indexDataOF = []):
+    def __init__(self, am, unsigned int pRegions=2, list initialSolution=[], 
+                 char* seedSelection = "kmeans",
+                 char* distanceType = "EuclideanSquared", 
+                 char* distanceStat = "Centroid",
+                 char* selectionType = "Minimum",
+                 float alpha = <float>0.2,
+                 char* numRegionsType = "Exogenous",
+                 char* objectiveFunctionType = "SS",
+                 float threshold = <float>0.0,
+                 list weightsDistanceStat = [],
+                 list weightsObjectiveFunctionType = [],
+                 list indexDataStat = [],
+                 list indexDataOF = []):
         """
         @type am: AreaManager
         @param am: Area manager object.
@@ -321,43 +335,49 @@ class RegionMaker:
 
         #  PREDEFINED NUMBER OF REGIONS
 
-        if self.numRegionsType == "Exogenous":
-            if initialSolution == []:
+        cdef list seeds, regions2createKeys, emptyList
+        cdef unsigned int c, lenUnassAreas = len(self.unassignedAreas), s, i, lseeds
+        if numRegionsType == <char*>"Exogenous":
+            if not initialSolution:
                 self.pRegions = pRegions
                 seeds = self.kmeansInit()
                 self.setSeeds(seeds)
                 c = 0
-                while len(self.unassignedAreas) != 0:
+                while lenUnassAreas > 0:
                     self.constructRegions()
+                    lenUnassAreas = len(self.unassignedAreas)
                     c += 1
                 self.objInfo = self.getObj()
-            elif initialSolution != []:
-                self.pRegions = len(numpy.unique(initialSolution))
+            else:
+                uniqueInitSolution = set(initialSolution)
+                self.pRegions = len(uniqueInitSolution)
                 seeds = []
-                for s in numpy.unique(initialSolution):
+                for s in uniqueInitSolution:
                     seeds.append(initialSolution.index(s))
                 self.setSeeds(seeds)
-                regions2create = dict.fromkeys(range(len(seeds)))
+                lseeds = len(seeds)
+                emptyList = [[]]*lseeds
+                regions2create = dict(enumerate(emptyList))
                 c = 0
+
                 for i in initialSolution:
-                    try:
-                        regions2create[i].append(c)
-                    except:
-                        regions2create[i] = [c]
+                    regions2create[i].append(c)
                     c += 1
                 c = 0
-                for i in regions2create.keys():
+                regions2createKeys = regions2create.keys()
+                for i in regions2createKeys:
                     self.unassignedAreas = regions2create[i][1:]
-                    while len(self.unassignedAreas) != 0:
+                    lenUnassAreas = len(self.unassignedAreas)
+                    while lenUnassAreas > 0:
                         self.constructRegions(filteredCandidates=self.unassignedAreas,
                                 filteredReg=i)
+                        lenUnassAreas = len(self.unassignedAreas)
                         c += 1
                 self.objInfo = self.getObj()
-
         #  NUMBER OF REGIONS IS ENDOGENOUS WITH A THRESHOLD VALUE 
 
-        if self.numRegionsType == "EndogenousThreshold":
-            self.constructionStage = "growing"
+        if self.numRegionsType == <char*>"EndogenousThreshold":
+            self.constructionStage = <char*>"growing"
             try: 
                 self.areas[self.areas.keys()[0]].thresholdVar
             except:
@@ -405,8 +425,8 @@ class RegionMaker:
 
         #  NUMBER OF REGIONS IS ENDOGENOUS WITH A RANGE VALUE 
 
-        if self.numRegionsType == "EndogenousRange":
-            self.constructionStage = "growing"  #  there are two values for constructionStage: "growing" and "enclaves"
+        if self.numRegionsType == <char*>"EndogenousRange":
+            self.constructionStage = <char*>"growing"  #  there are two values for constructionStage: "growing" and "enclaves"
             try: 
                 self.areas[self.areas.keys()[0]].thresholdVar
             except:
@@ -462,14 +482,18 @@ class RegionMaker:
                 self.removeRegionAsCandidate()
                 c += 1
         self.getIntraBorderingAreas()
-        
+
     def kmeansInit(self):
+        cachedDistances = {}
         y = self.am.y
         n = len(y)
         distances = numpy.ones(n)
         total = sum(distances)
         probabilities = map(lambda x: x / float(total), distances)
         seeds = []
+        localDistanceType = self.distanceType
+        localreturnDistance2Area = AreaCl.returnDistance2Area
+        numpy.random.seed(getpid())
         for k in range(self.pRegions):
             random = numpy.random.uniform(0, 1)
             find = False
@@ -481,8 +505,26 @@ class RegionMaker:
                 if inf <= random <= sup:
                     find = True
                     seeds += [cont]
-                    for area in self.am.areas:
-                        distancei = min(map(lambda x: self.am.areas[area].returnDistance2Area(self.am.areas[x], distanceType=self.distanceType), seeds))
+                    selfAmAreas = self.am.areas
+
+                    for area in selfAmAreas:
+                        currentArea = selfAmAreas[area]
+                        tempMap = []
+                        for x in seeds:
+                            if x < area:
+                                k = (x, area)
+                            elif x > area:
+                                k = (area, x)
+                            else:
+                                k = (0,0)
+                            cached = cachedDistances.get(k, 0)
+                            if not cached:
+                                newDist = localreturnDistance2Area(currentArea, selfAmAreas[x], distanceType=localDistanceType)
+                                tempMap.append(newDist)
+                                cachedDistances[k] = newDist
+                            else:
+                                tempMap.append(cached)
+                        distancei = min(tempMap)
                         distances[area] = distancei
                     total = sum(distances)
                     probabilities = map(lambda x: x / float(total), distances)
@@ -537,7 +579,7 @@ class RegionMaker:
         """
         Sets the initial seeds for clustering
         """
-        if self.numRegionsType == "Exogenous" and len(seeds) <= self.pRegions:
+        if self.numRegionsType == <char*>"Exogenous" and len(seeds) <= self.pRegions:
             idx = range(self.n)
             didx = list((set(idx) - set(seeds)) - self.am.noNeighs)
             numpy.random.shuffle(didx)
@@ -557,7 +599,7 @@ class RegionMaker:
         neighs = a.neighs
         try:
             self.region2Area[regionID].append(areaID)
-            if self.objectiveFunctionType == "GWalt":
+            if self.objectiveFunctionType == <char*>"GWalt":
                 try:
                     self.NRegion[regionID] += a.data[0]
                     for index in range(1,len(a.data)):
@@ -569,7 +611,7 @@ class RegionMaker:
                 self.N += a.data[0]
         except:
             self.region2Area[regionID] = [areaID]
-            if self.objectiveFunctionType == "GWalt":
+            if self.objectiveFunctionType == <char*>"GWalt":
                 self.NRegion[regionID] = a.data[0]
                 for index in range(1, len(a.data)):
                     if index == 1:
@@ -667,7 +709,7 @@ class RegionMaker:
         Gets the intrabordering areas
         """
         self.intraBorderingAreas = {}
-        if self.numRegionsType == "Exogenous":
+        if self.numRegionsType == <char*>"Exogenous":
             nr = range(self.pRegions)
         else:
             nr = self.feasibleRegions
@@ -700,7 +742,7 @@ class RegionMaker:
             a = self.areas[areaID]
             regionIDs = list(self.potentialRegions4Area[areaID])
             for region in regionIDs:
-                if (self.numRegionsType != "Exogenous" and self.constructionStage == "growing"
+                if (self.numRegionsType != <char*>"Exogenous" and self.constructionStage == <char*>"growing"
                         and region in self.feasibleRegions):
 
                     #  once a region reaches the threshold its grow is rejected until the
@@ -713,7 +755,7 @@ class RegionMaker:
                             lastRegion = region
                             pass
                         else:                        
-                            if self.selectionType != "FullRandom":
+                            if self.selectionType != <char*>"FullRandom":
                                 areasIdsIn = self.region2Area[region]
                                 areasInNow = [ self.areas[aID] for aID in areasIdsIn ]
                                 regionDistance = self.am.getDistance2Region(self.areas[areaID], self.region2Area[region],
@@ -728,16 +770,16 @@ class RegionMaker:
                         regionDistance = self.am.getDistance2Region(self.areas[areaID], self.region2Area[region],
                             distanceStat = self.distanceStat, weights = self.weightsDistanceStat,
                             indexData = self.indexDataStat)
-                        self.candidateInfo[(areaID,region)] = regionDistance
+                        self.candidateInfo[(areaID, region)] = regionDistance
                     else:
                         pass
         if len(self.candidateInfo) == 0:
             self.changedRegion = lastRegion
-        if self.numRegionsType == "EndogenousRange":
+        if self.numRegionsType == <char*>"EndogenousRange":
             self.filterCandidate(self.toRemove)
         self.selectionTypeDispatcher[self.selectionType](self)
         
-    def filterCandidate(self,removeCandidate=[]):
+    def filterCandidate(self, removeCandidate=[]):
         """
         Filter candidates
         """
@@ -746,7 +788,7 @@ class RegionMaker:
             for id in removeCandidate:
                 for cand,reg in self.candidateInfo.keys():
                     if cand == id:
-                        toRemove.append((cand,reg))
+                        toRemove.append((cand, reg))
             for remov in toRemove:
                 self.candidateInfo.pop(remov)
 
@@ -882,6 +924,7 @@ class RegionMaker:
             obj = self.getObjectiveFast(region2AreaDict, modifiedRegions)
         else:
             obj = self.getObjective(region2AreaDict)
+            
         return obj
         
     def checkFeasibility(self, regionID, areaID, region2AreaDict):
@@ -889,37 +932,46 @@ class RegionMaker:
         Check feasibility from a change region (remove an area from a region)
         """
         areas2Eval = list(region2AreaDict[regionID])
+        a2r = set(region2AreaDict[regionID])
+        aIDset = set([areaID])
         areas2Eval.remove(areaID)
-        seedArea = areas2Eval[0]
-        newRegion = (set([seedArea]) | set(self.areas[seedArea].neighs)) & set(areas2Eval) 
-        areas2Eval.remove(seedArea)
-        flag = 1
-        newAdded = newRegion - set([seedArea]) 
-        newNeighs = set([])
-        while flag:
-            for area in newAdded:
-                newNeighs = newNeighs | (((set(self.areas[area].neighs) &
-                        set(region2AreaDict[regionID])) -
-                        set([areaID])) - newRegion)
-                areas2Eval.remove(area)
-            newNeighs = newNeighs - newAdded
-            newAdded = newNeighs
-            newRegion = newRegion | newAdded
-            if len(areas2Eval) == 0:
-                feasible = 1
-                flag = 0
-                break
-            elif newNeighs == set([]) and len(areas2Eval) > 0:
-                feasible = 0
-                flag = 0
-                break
-        return feasible
+        key = list(areas2Eval)
+        key.sort()
+        key = tuple(key)
+        if cachedFeasible.has_key(key):
+            return cachedFeasible[key]
+        else:
+            seedArea = areas2Eval[0]
+            newRegion = (set([seedArea]) | set(self.areas[seedArea].neighs)) & set(areas2Eval) 
+            areas2Eval.remove(seedArea)
+            flag = 1
+            newAdded = newRegion - set([seedArea]) 
+            newNeighs = set([])
+            while flag:
+                for area in newAdded:
+                    newNeighs = newNeighs | (((set(self.areas[area].neighs) &
+                            a2r) -
+                            aIDset) - newRegion)
+                    areas2Eval.remove(area)
+                newNeighs = newNeighs - newAdded
+                newAdded = newNeighs
+                newRegion = newRegion | newAdded
+                if len(areas2Eval) == 0:
+                    feasible = 1
+                    flag = 0
+                    break
+                elif newNeighs == set([]) and len(areas2Eval) > 0:
+                    feasible = 0
+                    flag = 0
+                    break
+            cachedFeasible[key] = feasible
+            return feasible
 
     def calculateRegionValueThreshold(self):
         """
         # FIXME: No se que hace
         """
-        if self.numRegionsType == "Exogenous":
+        if self.numRegionsType == <char*>"Exogenous":
             nr = range(self.pRegions)
         else:
             nr = range(len(self.region2Area.keys()))
@@ -933,9 +985,10 @@ class RegionMaker:
         """
         Select solutions that improve the current objective function.
         """
-        intraCopy = copy.deepcopy(self.intraBorderingAreas)
-        region2AreaCopy = copy.deepcopy(self.region2Area)
-        area2RegionCopy = copy.deepcopy(self.area2Region)
+        #        intraCopy = copy.deepcopy(self.intraBorderingAreas)
+        intraCopy = dict(self.intraBorderingAreas)
+        region2AreaCopy = dict(self.region2Area)
+        area2RegionCopy = dict(self.area2Region)
         self.neighSolutions = {}
         for area in intraCopy.keys():
             regionIn = self.area2Region[area]
@@ -948,20 +1001,21 @@ class RegionMaker:
                     if obj < self.objInfo:
                         f = self.checkFeasibility(regionIn, area, self.region2Area)
                         if f == 1:
-                            if self.numRegionsType == "Exogenous":
+                            if self.numRegionsType == <char*>"Exogenous":
                                 self.neighSolutions[(area, region)] = obj
-                            elif self.numRegionsType == "EndogenousThreshold":
+                            elif self.numRegionsType == <char*>"EndogenousThreshold":
                                 if  self.regionValue[region] >= self.regionalThreshold and self.regionValue[regionIn] >= self.regionalThreshold:
                                     self.neighSolutions[(area,region)] = obj
 
     def allCandidates(self):
         """
         Select neighboring solutions.
-        """        
+        """
 
-        intraCopy = copy.deepcopy(self.intraBorderingAreas)
-        region2AreaCopy = copy.deepcopy(self.region2Area)
-        area2RegionCopy = copy.deepcopy(self.area2Region)
+        #        intraCopy = copy.deepcopy(self.intraBorderingAreas)
+        intraCopy = dict(self.intraBorderingAreas)
+        region2AreaCopy = dict(self.region2Area)
+        area2RegionCopy = dict(self.area2Region)
         self.neighSolutions = {}
         for area in intraCopy.keys():
             regionIn = self.area2Region[area]
@@ -970,15 +1024,15 @@ class RegionMaker:
                 for region in regions4Move:
                     f = self.checkFeasibility(regionIn, area, self.region2Area)
                     if f == 1:
-                        if self.numRegionsType == "Exogenous":
+                        if self.numRegionsType == <char*>"Exogenous":
                             self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
-                            modifiedRegions = [region,regionIn]
+                            modifiedRegions = [region, regionIn]
                             obj = self.recalcObj(region2AreaCopy, modifiedRegions)
-                            self.neighSolutions[(area,region)] = obj
+                            self.neighSolutions[(area, region)] = obj
                             self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
-                        elif self.numRegionsType == "EndogenousThreshold":
+                        elif self.numRegionsType == <char*>"EndogenousThreshold":
                             self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
-                            if  self.regionValue[region] >= self.regionalThreshold and self.regionValue[regionIn] >= self.regionalThreshold:
+                            if self.regionValue[region] >= self.regionalThreshold and self.regionValue[regionIn] >= self.regionalThreshold:
                                 obj = self.recalcObj(region2AreaCopy)
                                 self.neighSolutions[(area, region)] = obj
                             self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
@@ -1004,7 +1058,7 @@ class RegionMaker:
         region2AreaDict[oldRegion].remove(area)
         region2AreaDict[newRegion].append(area)
         area2RegionDict[area] = newRegion
-        if self.objectiveFunctionType == "GWalt":
+        if self.objectiveFunctionType == <char*>"GWalt":
             a = self.areas[area]
             self.NRegion[newRegion] += a.data[0]
             self.NRegion[oldRegion] -= a.data[0]
@@ -1012,7 +1066,7 @@ class RegionMaker:
                 self.data[newRegion][index - 1] += a.data[index] * a.data[0]
             for index in range(1, len(a.data)):
                 self.data[oldRegion][index-1] -= a.data[index] * a.data[0]
-        if self.numRegionsType == "EndogenousThreshold":
+        if self.numRegionsType == <char*>"EndogenousThreshold":
             self.regionValue[newRegion] += self.areas[area].thresholdVar
             self.regionValue[oldRegion] -= self.areas[area].thresholdVar
 
@@ -1048,36 +1102,35 @@ class RegionMaker:
                 
         self.regions = self.returnRegions() 
                 
-    def updateTabuList(self,newValue,aList,endInd):
+    def updateTabuList(self, newValue, aList, endInd):
         """
         Add a new value to the tabu list.
         """
         return [newValue] + aList[0:endInd-1]
-
-    def tabuMove(self, tabuLength=5, convTabu=5, typeTabu="exact"):
+    
+    def tabuMove(self, unsigned int tabuLength=5, unsigned int convTabu=5, char* typeTabu="exact"):
         """
         Conduct a solution to the best posible with tabu search
         """
-        aspireOBJ = self.objInfo
-        currentOBJ = self.objInfo
+        cdef double aspireOBJ = self.objInfo
+        cdef double currentOBJ = self.objInfo
         aspireRegions = self.returnRegions()
-        region2AreaAspire = copy.deepcopy(self.region2Area)
-        area2RegionAspire = copy.deepcopy(self.area2Region)
+        region2AreaAspire = dict(self.region2Area)
+        area2RegionAspire = dict(self.area2Region)
         currentRegions = aspireRegions
-        bestAdmisable = 9999999.0
-        tabuList = numpy.zeros(tabuLength)
-        tabuList = tabuList.tolist()
-        cBreak = []
-        c = 1
+        cdef double bestAdmisable = 9999999.0
+        cdef list tabuList = [0]*tabuLength
+        cdef list cBreak = []
+        cdef unsigned int c = 1
         self.round = 0
-        resList = []
-        epsilon = 1e-10
+        cdef list resList = []
+        cdef double epsilon = 1e-10
 
         while c <= convTabu:
 
             #  print "regions: ",self.returnRegions(), self.objInfo
 
-            if typeTabu == "exact":
+            if typeTabu == <char*>"exact":
                 self.objDict = objFunctions.makeObjDict(self)
                 self.allCandidates()
 
@@ -1085,28 +1138,25 @@ class RegionMaker:
 
             else:
                 moves = self.allMoves()
-            if (typeTabu == "exact" and len(self.neighSolutions) == 0) or (typeTabu == "random" and len(moves) == 0):
+            if (typeTabu == <char*>"exact" and len(self.neighSolutions) == 0) or (typeTabu == <char*>"random" and len(moves) == 0):
                 c += convTabu
             else:
-                if typeTabu == "exact":
+                if typeTabu == <char*>"exact":
                     sorted = sortedKeys(self.neighSolutions)
                     end = len(sorted)
                 else:
                     end = len(moves)
                 run = 0
                 while run < end:
-                    if typeTabu == "exact":
+                    if typeTabu == <char*>"exact":
                         move = sorted[run]
                         area,region = move
                         obj4Move = self.neighSolutions[move]
                         candidate = 1
-
-                        #  print "** selected move (area,region)",move
-
                     else:
                         candidate = 0
-                        region2AreaCopy = copy.deepcopy(self.region2Area)
-                        area2RegionCopy = copy.deepcopy(self.area2Region)
+                        region2AreaCopy = dict(self.region2Area)
+                        area2RegionCopy = dict(self.area2Region)
                         while (candidate == 0 and len(moves) > 0):
                             move = moves[numpy.random.randint(0, len(moves))]
                             moves.remove(move)
@@ -1115,12 +1165,12 @@ class RegionMaker:
                             regionIn = self.area2Region[area]
                             f = self.checkFeasibility(regionIn, area, self.region2Area)
                             if f == 1:
-                                if self.numRegionsType == "Exogenous":
+                                if self.numRegionsType == <char*>"Exogenous":
                                     self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
                                     obj4Move = self.recalcObj(region2AreaCopy)
                                     self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
                                     candidate = 1
-                                elif self.numRegionsType == "EndogenousThreshold":
+                                elif self.numRegionsType == <char*>"EndogenousThreshold":
                                         self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
                                         if  self.regionValue[region] >= self.regionalThreshold and self.regionValue[regionIn] >= self.regionalThreshold:
                                             obj4Move = self.recalcObj(region2AreaCopy)
@@ -1140,14 +1190,14 @@ class RegionMaker:
                                         #  print "CASE1: improves aspirational: ",aspireOBJ,obj4Move
 
                                         oldRegion = self.area2Region[area]
-                                        tabuList = self.updateTabuList((area,oldRegion), tabuList, tabuLength)
+                                        tabuList = self.updateTabuList((area, oldRegion), tabuList, tabuLength)
                                         self.moveArea(area, region)
                                         self.objInfo = obj4Move
                                         aspireOBJ = obj4Move
                                         currentOBJ = obj4Move
                                         aspireRegions = self.returnRegions()
-                                        region2AreaAspire = copy.deepcopy(self.region2Area)
-                                        area2RegionAspire = copy.deepcopy(self.area2Region)
+                                        region2AreaAspire = dict(self.region2Area)
+                                        area2RegionAspire = dict(self.area2Region)
                                         currentRegions = aspireRegions
                                         bestAdmisable = obj4Move
                                         cBreak.append(c)
@@ -1163,21 +1213,21 @@ class RegionMaker:
                                         if tabuCount == end:
                                                 c = convTabu
                         else:
-                                #  print "move is NOT in tabu list" 
-
+                            #  print "move is NOT in tabu list" 
+                            
                                 if (aspireOBJ-obj4Move) > epsilon:
 
                                         #  print "CASE 3: improves aspirational: ",aspireOBJ,obj4Move
 
                                         oldRegion = self.area2Region[area]
-                                        tabuList = self.updateTabuList((area,oldRegion), tabuList, tabuLength)
+                                        tabuList = self.updateTabuList((area, oldRegion), tabuList, tabuLength)
                                         self.moveArea(area, region)
                                         self.objInfo = obj4Move
                                         aspireOBJ = obj4Move
                                         currentOBJ = obj4Move
                                         aspireRegions = self.returnRegions()
-                                        region2AreaAspire = copy.deepcopy(self.region2Area)
-                                        area2RegionAspire = copy.deepcopy(self.area2Region)
+                                        region2AreaAspire = dict(self.region2Area)
+                                        area2RegionAspire = dict(self.area2Region)
                                         currentRegions = aspireRegions
                                         bestAdmisable = obj4Move
                                         cBreak.append(c)
@@ -1204,8 +1254,8 @@ class RegionMaker:
                         c += convTabu
         self.objInfo = aspireOBJ 
         self.regions = aspireRegions
-        self.region2Area = copy.deepcopy(region2AreaAspire)
-        self.area2Region = copy.deepcopy(area2RegionAspire)
+        self.region2Area = dict(region2AreaAspire)
+        self.area2Region = dict(area2RegionAspire)
 
         #  print "FINAL SOLUTION IN TABU",self.objInfo,self.regions
 
@@ -1266,11 +1316,11 @@ class RegionMaker:
         currentOBJ = self.objInfo
         bestRegions = self.returnRegions()
         currentRegions = self.returnRegions()
-        region2AreaBest = copy.deepcopy(self.region2Area)
-        area2RegionBest = copy.deepcopy(self.area2Region)
+        region2AreaBest = dict(self.region2Area)
+        area2RegionBest = dict(self.area2Region)
         improve = 1
         while improve == 1:
-            regions = range(0,self.pRegions)
+            regions = range(0, self.pRegions)
             while len(regions) > 0:
                 
                 #  step 3
@@ -1290,7 +1340,7 @@ class RegionMaker:
                     
                     # step 5
 
-                    randomArea = numpy.random.randint(0,len(borderingAreas))
+                    randomArea = numpy.random.randint(0, len(borderingAreas))
                     area = borderingAreas[randomArea]
                     borderingAreas.remove(area)
                     posibleMove = list(self.returnIntraBorderingAreas()[area])
@@ -1314,8 +1364,8 @@ class RegionMaker:
                                 currentOBJ = obj
                                 bestRegions = self.returnRegions()
                                 currentRegions = self.returnRegions()
-                                region2AreaBest = copy.deepcopy(self.region2Area)
-                                area2RegionBest = copy.deepcopy(self.area2Region)
+                                region2AreaBest = dict(self.region2Area)
+                                area2RegionBest = dict(self.area2Region)
 
                                 #  print "--- Local improvement (area, region)", area, move
                                 #  print "--- New Objective Function value: ", obj
@@ -1340,8 +1390,8 @@ class RegionMaker:
                                     borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.returnRegion2Area(region)))
                                     break
         self.objInfo = bestOBJ 
-        self.region2Area = copy.deepcopy(region2AreaBest)
-        self.area2Region = copy.deepcopy(area2RegionBest)
+        self.region2Area = dict(region2AreaBest)
+        self.area2Region = dict(area2RegionBest)
  
     def AZPTabuMove(self, tabuLength=5, convTabu=5):
         """
@@ -1350,8 +1400,8 @@ class RegionMaker:
         aspireOBJ = self.objInfo
         currentOBJ = self.objInfo
         aspireRegions = self.returnRegions()
-        region2AreaAspire = copy.deepcopy(self.region2Area)
-        area2RegionAspire = copy.deepcopy(self.area2Region)
+        region2AreaAspire = dict(self.region2Area)
+        area2RegionAspire = dict(self.area2Region)
         currentRegions = copy.deepcopy(aspireRegions)
         tabuList = numpy.zeros(tabuLength)
         tabuList = tabuList.tolist()
@@ -1399,8 +1449,8 @@ class RegionMaker:
                     if  (aspireOBJ - obj4Move) > epsilon:
                         aspireOBJ = obj4Move
                         aspireRegions = self.returnRegions()
-                        region2AreaAspire = copy.deepcopy(self.region2Area)
-                        area2RegionAspire = copy.deepcopy(self.area2Region)
+                        region2AreaAspire = dict(self.region2Area)
+                        area2RegionAspire = dict(self.area2Region)
                         c = 1
                     currentOBJ = obj4Move
                     currentRegions = self.returnRegions()
@@ -1416,8 +1466,8 @@ class RegionMaker:
                     currentRegions = self.returnRegions()
         self.objInfo = aspireOBJ 
         self.regions = aspireRegions
-        self.region2Area = copy.deepcopy(region2AreaAspire)
-        self.area2Region = copy.deepcopy(area2RegionAspire)
+        self.region2Area = dict(region2AreaAspire)
+        self.area2Region = dict(area2RegionAspire)
         self.resList = resList
 
     def reactiveTabuMove(self, convTabu=99):
@@ -1440,8 +1490,8 @@ class RegionMaker:
         epsilon = 1e-10
         aspireOBJ = self.objInfo
         aspireRegions = self.returnRegions()
-        region2AreaAspire = copy.deepcopy(self.region2Area)
-        area2RegionAspire = copy.deepcopy(self.area2Region)
+        region2AreaAspire = dict(self.region2Area)
+        area2RegionAspire = dict(self.area2Region)
         c = 1
         while c <= convTabu:
             improved = 0
@@ -1480,8 +1530,8 @@ class RegionMaker:
                 if  (aspireOBJ - obj4Move) > epsilon:
                     aspireOBJ = obj4Move
                     aspireRegions = self.returnRegions()
-                    region2AreaAspire = copy.deepcopy(self.region2Area)
-                    area2RegionAspire = copy.deepcopy(self.area2Region)
+                    region2AreaAspire = dict(self.region2Area)
+                    area2RegionAspire = dict(self.area2Region)
                     improved = 1
 
                 #  step 6
@@ -1527,8 +1577,8 @@ class RegionMaker:
                             if  (aspireOBJ-obj4Move) > epsilon:
                                 aspireOBJ = obj4Move
                                 aspireRegions = self.returnRegions()
-                                region2AreaAspire = copy.deepcopy(self.region2Area)
-                                area2RegionAspire = copy.deepcopy(self.area2Region)
+                                region2AreaAspire = dict(self.region2Area)
+                                area2RegionAspire = dict(self.area2Region)
                                 improved = 1
                                 
                 #  step 8
@@ -1553,8 +1603,8 @@ class RegionMaker:
 
         self.objInfo = aspireOBJ 
         self.regions = aspireRegions
-        self.region2Area = copy.deepcopy(region2AreaAspire)
-        self.area2Region = copy.deepcopy(area2RegionAspire)
+        self.region2Area = dict(region2AreaAspire)
+        self.area2Region = dict(area2RegionAspire)
 
     def moveArea(self, areaID, regionID):
         """
@@ -1566,10 +1616,10 @@ class RegionMaker:
         self.area2Region[areaID] = regionID
         a = self.areas[areaID]
         toUpdate = [areaID] + a.neighs
-        if self.objectiveFunctionType == "GWalt":
+        if self.objectiveFunctionType == <char*>"GWalt":
             self.NRegion[regionID] += a.data[0]
             self.NRegion[oldRegion] -= a.data[0]
-        if self.numRegionsType == "EndogenousThreshold":
+        if self.numRegionsType == <char*>"EndogenousThreshold":
             self.regionValue[regionID] += self.areas[areaID].thresholdVar
             self.regionValue[oldRegion] -= self.areas[areaID].thresholdVar
         try:
@@ -1837,14 +1887,15 @@ class AreaCl:
                     index += 1
             self.data = data[0: int(n + 1)]
     
-    def returnDistance2Area(self, otherArea, distanceType="EuclideanSquared", indexData=[]):
+    def returnDistance2Area(self, otherArea, distanceType="EuclideanSquared", list indexData=[]):
         """
         Return the distance between the area and other area
         """
+        cdef list y0 = []
+        cdef list y1 = []
+        cdef unsigned int index
         if len(indexData) == 0:
             indexData = range(len(self.data))
-        y0 = []
-        y1 = []
         for index in indexData:
             y0 += [self.data[index]]
             y1 += [otherArea.data[index]]

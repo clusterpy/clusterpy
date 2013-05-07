@@ -1238,7 +1238,206 @@ algorithm"
         self.outputCluster[name]["fieldName"] = self.fieldNames[-1]
         if dissolve == 1:
             self.dissolveMap(dataOperations=dataOperations)
-    
+
+    def multishockFinder(self,variables,minShocks,maxShocks,
+                        inequalityIndex,outFile,clusterAlgorithm,
+                        nClusters, **kargs):
+        """
+            This function runs the algorithm spMorph, devised by
+            [Duque_Ye_Folch2012], for a predefined shock. spMorph is an
+            exploratory space-time analysis tool for describing processes of
+            spatial redistribution of a given variable.  
+            
+
+            :keyword variables: List with variables to be analyzed. The variables must be chronologically sorted; e.g: ['Y1978', 'Y1979', 'Y1980', 'Y1981', 'Y1982', 'Y1983', 'Y1984', 'Y1985', 'Y1986', 'Y1987', 'Y1988'] 
+            :type variables: list
+
+            :keyword minShocks: minimum number of shocks to evaluate
+            :type minShocks: integer
+
+            :keyword maxShocks: maximum number of shocks to evaluate
+            :type maxShocks: integer
+
+            :keyword inequalityIndex: name of the inequality index to be utilized in the algorithm. By now, the only option is 'theil' 
+            :type inequalityIndex: string
+
+            :keyword outFile: Name for the output file; e.g.: "spMorph" (no extension)
+            :type outFile: string 
+
+
+            :keyword clusterAlgorithm: name of the spatial clustering algorithm to be utilized in the algorithm. The clustering algorithm must be any version of 'azp' or 'arisel'
+            :type clusterAlgorithm: string
+
+            :keyword nClusters: number of regions 
+            :type nClusters: integer
+
+            After the parameter nClusters you can include more parameters related with the clustering algorithm that you are using. We recomend not to use dissolve=1 option
+
+            **Example 1**::
+            import clusterpy
+            china = clusterpy.importArcData("clusterpy/data_examples/china")
+            variables = ['Y1978', 'Y1979', 'Y1980', 'Y1981']
+            china.multishockFinder(variables,0,2,'theil',"multishocktable",'azpTabu',4)
+        """
+        def createTable(index,comb,shock):
+            auxline = str(index)
+            auxline = auxline.replace("[","")
+            auxline = auxline.replace("]","")
+            combtext = str(comb)
+            combtext = combtext.replace(","," ")
+            line = "".join([str(len(comb)),",",str(combtext),",",shock,",",auxline,",","\n"])
+            return line
+        bestSolutions = {}
+        table_t = ""
+        table_tw = ""
+        table_tb = ""
+        table_tw_t = ""
+        table_lowerTw_t = ""
+        table_a2r = ""
+        auxline = str(variables)
+        auxline = auxline.replace("[","")
+        auxline = auxline.replace("]","")
+        auxline = auxline.replace("'","")
+        header = "".join(["#shocks,shocks,shock,",auxline,"\n"])
+        auxline = str(range(len(self.areas)))
+        auxline = auxline.replace("[","")
+        auxline = auxline.replace("]","")
+        header_a2r = "".join(["#shocks,shocks,shock,",auxline,"\n"])
+        fout = open(outFile + ".csv","w")
+        fouta2r = open(outFile + "_a2r.csv","w")
+        for nElements in range(minShocks,maxShocks+1):
+            bestSol = [] # (t,tb,tw,tw/t,loweTw/t,comb,objectiveFunction)
+            for comb in itertools.combinations(variables[1:],nElements):
+                t, tb, tw, tw_t, lowerTw_t,a2r = self.inequalityShock(variables,
+                    comb,inequalityIndex,clusterAlgorithm,nClusters,**kargs)
+
+                for nc in range(nElements+1):
+                    line = createTable(tb[nc],comb,str(nc))
+                    table_tb = "".join([table_tb,line])
+                    line = createTable(tw[nc],comb,str(nc))
+                    table_tw = "".join([table_tw,line])
+                    line = createTable(tw_t[nc],comb,str(nc))
+                    table_tw_t = "".join([table_tw_t,line])
+                    line = createTable(a2r[nc],comb,str(nc))
+                    table_a2r = "".join([table_a2r,line])
+                line = createTable(lowerTw_t,comb,"")
+                table_lowerTw_t = "".join([table_lowerTw_t,line])
+
+                if bestSol == [] or sum(lowerTw_t) <= (bestSol[6]):
+                    bestSol = (t,tb,tw,tw_t,lowerTw_t,comb,sum(lowerTw_t))
+            bestSolutions[nElements] = bestSol
+
+        auxline = str(t[0])
+        auxline = auxline.replace("[","")
+        auxline = auxline.replace("]","")
+        combtext = str(comb)
+        combtext = combtext.replace(","," ")
+        line = "".join([str(nElements),",",str(combtext),
+                        ",",auxline,"\n"])
+        table_t = "".join(["Theil index\n",header,line,"\n\n"])
+        fout.write(table_t)
+        table_tb = "".join(["Theil index between groups\n",header,table_tb,"\n\n"])
+        fout.write(table_tb)
+        table_tw = "".join(["Theil index within groups\n",header,table_tw,"\n\n"])
+        fout.write(table_tw)
+        table_tw_t = "".join(["Tw/T\n",header,table_tw_t,"\n\n"])
+        fout.write(table_tw_t)
+        table_lowerTw_t = "".join(["Lower Bounds\n",header,table_lowerTw_t,"\n\n"])
+        fout.write(table_lowerTw_t)
+        table_a2r = "".join([header_a2r,table_a2r])
+        fouta2r.write(table_a2r)
+        fout.close()
+        fouta2r.close()
+        return bestSolutions    
+
+    def inequalityShock(self,variables,shokVariables,
+                        inequalityIndex,clusterAlgorithm,
+                        nClusters,**kargs):
+        """
+            This function runs the algorithm spMorph, devised by
+            [Duque_Ye_Folch2012], for a predefined shock. spMorph is an
+            exploratory space-time analysis tool for describing processes of
+            spatial redistribution of a given variable.  
+            
+
+            :keyword variables: List with variables to be analyzed. The variables must be chronologically sorted; e.g: ['Y1978', 'Y1979', 'Y1980', 'Y1981', 'Y1982', 'Y1983', 'Y1984', 'Y1985', 'Y1986', 'Y1987', 'Y1988'] 
+            :type variables: list
+
+            :keyword shokVariables: list with the name of the variable (in
+            vars) in wich a shock ocurred. NOTE: the shock variable is
+            included as the first variable of the next period; e.g: ['Y1981', 'Y1984'], this implies that the periods to analyze are: 1978-1980; 1981-1983 and 1984-1988.
+            :type shokVariables: list
+
+            :keyword inequalityIndex: name of the inequality index to be utilized in the algorithm. By now, the only option is 'theil' 
+            :type inequalityIndex: string
+
+            :keyword clusterAlgorithm: name of the spatial clustering algorithm to be utilized in the algorithm. The clustering algorithm must be any version of 'azp' or 'arisel'
+            :type clusterAlgorithm: string
+
+            :keyword nClusters: number of regions 
+            :type nClusters: integer
+
+            After the parameter nClusters you can include more parameters related with the clustering algorithm that you are using. We recomend not to use dissolve=1 option
+
+            The function returns:
+
+            t: total Theil
+
+            tb: between groups inequality
+            
+            tw: within groups inequality
+            
+            lb: lower bound
+            
+            a2r: solution vector for the regionalization algorithm
+
+            **Example**::
+            import clusterpy
+            china = clusterpy.importArcData("clusterpy/data_examples/china")
+            variables = ['Y1978', 'Y1979', 'Y1980', 'Y1981', 'Y1982',
+            'Y1983', 'Y1984', 'Y1985', 'Y1986', 'Y1987', 'Y1988',
+            'Y1989', 'Y1990', 'Y1991', 'Y1992' , 'Y1993', 'Y1994',
+            'Y1995', 'Y1996', 'Y1997', 'Y1998']
+            shokVariable = ['Y1984']
+            t,tb,tw,tw_t,lb,a2r=china.inequalityShock(variables,shokVariable,'theil',
+            'arisel',5)
+            
+
+        """    
+        tempSet = []
+        area2regions = []
+        for var in variables:
+            if var in shokVariables:
+                if tempSet == []:
+                    raise NameError("First period could not \
+be a shock period")
+                else:
+                    clusterArgs = (clusterAlgorithm,tempSet,nClusters)
+                    self.cluster(*clusterArgs,**kargs)
+                    area2regions.append(self.region2areas)
+                tempSet = [var]
+            else:
+                tempSet.append(var)
+        clusterArgs = (clusterAlgorithm,tempSet,nClusters)
+        self.cluster(*clusterArgs,**kargs)
+        area2regions.append(self.region2areas)
+        Y = self.getVars(*variables)
+        t = []
+        tb = []
+        tw = []
+        tw_t = []
+        for a2r in area2regions:
+            t2,tb2,tw2,tw_t2 = inequalityMultivar(Y,a2r,inequalityIndex)
+            t.append(t2)
+            tb.append(tb2)
+            tw.append(tw2)
+            tw_t.append(tw_t2)
+        
+        lowerTw_t = [min(x) for x in zip(*tw_t)]
+        return t, tb, tw, tw_t, lowerTw_t,area2regions
+            
+
+
 
     def inequality(*args,**kargs):
         """

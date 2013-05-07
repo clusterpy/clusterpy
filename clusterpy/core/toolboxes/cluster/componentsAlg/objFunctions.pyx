@@ -1,4 +1,5 @@
 # encoding: latin2
+
 """
 Objective functions
 """
@@ -11,7 +12,6 @@ __email__ = "contacto@rise-group.org"
 
 import numpy
 import distanceFunctions
-
 
 def getObjectiveFunctionSumSquares(RegionMaker, region2AreaDict, indexData=[]):
     """
@@ -36,6 +36,7 @@ def getObjectiveFunctionSumSquares(RegionMaker, region2AreaDict, indexData=[]):
     obj = sum(objDict.values())
     return obj
 
+cachedObj = {}
 def getObjectiveFunctionSumSquaresFast(RegionMaker, region2AreaDict, list modifiedRegions, list indexData=[]):
     """
     Sum of squares from each area to the region's centroid
@@ -44,25 +45,33 @@ def getObjectiveFunctionSumSquaresFast(RegionMaker, region2AreaDict, list modifi
     cdef list r2aDictKeys = region2AreaDict.keys()
     cdef unsigned int region, aID, index
     cdef list areasIdsIn, areasInNow, dataAvg, areaData, areaDataList
-
     for region in r2aDictKeys:
         if region in modifiedRegions:
             valRegion = 0.0
             areasIdsIn = region2AreaDict[region]
-            areasInNow = [RegionMaker.areas[aID] for aID in areasIdsIn]
-            dataAvg = RegionMaker.am.getDataAverage(areasIdsIn, indexData)
-            for area in areasInNow:
-                areaData = []
-                areaDataList = area.data
-                for index in indexData:
-                    areaData.append(areaDataList[index])
-                areaData = [areaData] + [dataAvg]
-                # Taking the first element from the dataDistance
-                dist = distanceFunctions.distMethods[RegionMaker.distanceType](areaData)[0][0]
-                valRegion += dist
+            key = areasIdsIn
+            key.sort()
+            key = tuple(key)
+            if cachedObj.has_key(key):
+                valRegion = cachedObj[key]
+            else:
+                areasInNow = [RegionMaker.areas[aID] for aID in areasIdsIn]
+                dataAvg = RegionMaker.am.getDataAverage(areasIdsIn, indexData)
+                
+                for area in areasInNow:
+                    areaData = []
+                    areaDataList = area.data
+                    for index in indexData:
+                        areaData.append(areaDataList[index])
+                    areaData = [areaData] + [dataAvg]
+                    # Taking the first element from the dataDistance
+                    dist = distanceFunctions.distMethods[RegionMaker.distanceType](areaData)[0][0]
+                    valRegion += dist
+                    
+                cachedObj[key] = valRegion
             obj += valRegion
         else:
-            obj += RegionMaker.objDict[region]
+            obj += RegionMaker.objDict[region] 
     return obj
 
 
