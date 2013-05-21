@@ -17,6 +17,7 @@ import objFunctions
 import distanceFunctions
 import selectionTypeFunctions
 from os import getpid
+from sys import stderr
 
 class AreaManager:
     """
@@ -517,11 +518,12 @@ class RegionMaker:
                                 k = (area, x)
                             else:
                                 k = (0,0)
-                            cached = cachedDistances.get(k, 0)
-                            if not cached:
+                            cached = cachedDistances.get(k, -1)
+                            if cached < 0:
                                 newDist = localreturnDistance2Area(currentArea, selfAmAreas[x], distanceType=localDistanceType)
                                 tempMap.append(newDist)
                                 cachedDistances[k] = newDist
+
                             else:
                                 tempMap.append(cached)
                         distancei = min(tempMap)
