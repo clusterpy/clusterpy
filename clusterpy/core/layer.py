@@ -1303,56 +1303,66 @@ algorithm"
         auxline = auxline.replace("[","")
         auxline = auxline.replace("]","")
         header_a2r = "".join(["#shocks,shocks,shock,",auxline,"\n"])
-        fout = open(outFile + ".csv","w")
+        fout_t = open(outFile + "_t.csv","w")
+        fout_t.write(header)
+        fout_tb = open(outFile + "_tb.csv","w")
+        fout_tb.write(header)
+        fout_tw = open(outFile + "_tw.csv","w")
+        fout_tw.write(header)
+        fout_twt = open(outFile + "_twt.csv","w")
+        fout_twt.write(header)
+        fout_lb = open(outFile + "_lb.csv","w")
+        fout_lb.write(header)
         fouta2r = open(outFile + "_a2r.csv","w")
+        fouta2r.write(header_a2r)
+        cachedSolutions = {}
         for nElements in range(minShocks,maxShocks+1):
             bestSol = [] # (t,tb,tw,tw/t,loweTw/t,comb,objectiveFunction)
             for comb in itertools.combinations(variables[1:],nElements):
+                comb = list(comb)
+                comb.sort()
+                comb = tuple(comb)
                 t, tb, tw, tw_t, lowerTw_t,a2r = self.inequalityShock(variables,
-                    comb,inequalityIndex,clusterAlgorithm,nClusters,**kargs)
+                    comb,inequalityIndex,clusterAlgorithm,nClusters,cachedSolutions,**kargs)
+                if bestSol == [] or sum(lowerTw_t) <= (bestSol["of"]):
+                    bestSol = {"t" : t,
+                                "tb" : tb,
+                                "tw" : tw,
+                                "tw_t" : tw_t,
+                                "lowerTw_t" : lowerTw_t,
+                                "comb" : comb,
+                                "of" : sum(lowerTw_t),
+                                "a2r" : a2r}
+            fout_t = open(outFile + "_t.csv","a")
+            fout_tb = open(outFile + "_tb.csv","a")
+            fout_tw = open(outFile + "_tw.csv","a")
+            fout_twt = open(outFile + "_twt.csv","a")
+            fout_lb = open(outFile + "_lb.csv","a")
+            fouta2r = open(outFile + "_a2r.csv","a")
+            for nc in range(nElements+1):
+                line = createTable(bestSol["t"][nc],bestSol["comb"],str(nc))
+                fout_t.write(line)
+                line = createTable(bestSol["tb"][nc],bestSol["comb"],str(nc))
+                fout_tb.write(line)
+                line = createTable(bestSol["tw"][nc],bestSol["comb"],str(nc))
+                fout_tw.write(line)
+                line = createTable(bestSol["tw_t"][nc],bestSol["comb"],str(nc))
+                fout_twt.write(line)
+                line = createTable(bestSol["a2r"][nc],bestSol["comb"],str(nc))
+                fouta2r.write(line)
+            line = createTable(bestSol["lowerTw_t"],comb,"")
+            fout_lb.write(line)
+            fout_t.close()
+            fout_tb.close()
+            fout_tw.close()
+            fout_twt.close()
+            fout_lb.close()
+            fouta2r.close()
 
-                for nc in range(nElements+1):
-                    line = createTable(tb[nc],comb,str(nc))
-                    table_tb = "".join([table_tb,line])
-                    line = createTable(tw[nc],comb,str(nc))
-                    table_tw = "".join([table_tw,line])
-                    line = createTable(tw_t[nc],comb,str(nc))
-                    table_tw_t = "".join([table_tw_t,line])
-                    line = createTable(a2r[nc],comb,str(nc))
-                    table_a2r = "".join([table_a2r,line])
-                line = createTable(lowerTw_t,comb,"")
-                table_lowerTw_t = "".join([table_lowerTw_t,line])
-
-                if bestSol == [] or sum(lowerTw_t) <= (bestSol[6]):
-                    bestSol = (t,tb,tw,tw_t,lowerTw_t,comb,sum(lowerTw_t))
-            bestSolutions[nElements] = bestSol
-
-        auxline = str(t[0])
-        auxline = auxline.replace("[","")
-        auxline = auxline.replace("]","")
-        combtext = str(comb)
-        combtext = combtext.replace(","," ")
-        line = "".join([str(nElements),",",str(combtext),
-                        ",",auxline,"\n"])
-        table_t = "".join(["Theil index\n",header,line,"\n\n"])
-        fout.write(table_t)
-        table_tb = "".join(["Theil index between groups\n",header,table_tb,"\n\n"])
-        fout.write(table_tb)
-        table_tw = "".join(["Theil index within groups\n",header,table_tw,"\n\n"])
-        fout.write(table_tw)
-        table_tw_t = "".join(["Tw/T\n",header,table_tw_t,"\n\n"])
-        fout.write(table_tw_t)
-        table_lowerTw_t = "".join(["Lower Bounds\n",header,table_lowerTw_t,"\n\n"])
-        fout.write(table_lowerTw_t)
-        table_a2r = "".join([header_a2r,table_a2r])
-        fouta2r.write(table_a2r)
-        fout.close()
-        fouta2r.close()
-        return bestSolutions    
 
     def inequalityShock(self,variables,shokVariables,
                         inequalityIndex,clusterAlgorithm,
-                        nClusters,**kargs):
+                        nClusters,cachedSolutions,**kargs):
         """
             This function runs the algorithm spMorph, devised by
             [Duque_Ye_Folch2012], for a predefined shock. spMorph is an
@@ -1405,36 +1415,58 @@ algorithm"
 
         """    
         tempSet = []
-        area2regions = []
+        area2regions = {}
+        area2regionsList = []
+        tempSetOrdered = []
         for var in variables:
             if var in shokVariables:
                 if tempSet == []:
                     raise NameError("First period could not \
 be a shock period")
                 else:
-                    clusterArgs = (clusterAlgorithm,tempSet,nClusters)
-                    self.cluster(*clusterArgs,**kargs)
-                    area2regions.append(self.region2areas)
+                    tempSet.sort()
+                    tempSet = tuple(tempSet)
+                    if tempSet not in cachedSolutions:
+                        clusterArgs = (clusterAlgorithm,tempSet,nClusters)
+                        self.cluster(*clusterArgs,**kargs)
+                        area2regions[tempSet] = self.region2areas
+                        tempSetOrdered.append(tempSet)
+                    else:
+                        area2regions[tempSet] = cachedSolutions[tempSet][-1]
+                        tempSetOrdered.append(tempSet)
                 tempSet = [var]
             else:
                 tempSet.append(var)
-        clusterArgs = (clusterAlgorithm,tempSet,nClusters)
-        self.cluster(*clusterArgs,**kargs)
-        area2regions.append(self.region2areas)
+        tempSet.sort()
+        tempSet = tuple(tempSet)
+        if tempSet not in cachedSolutions:
+            clusterArgs = (clusterAlgorithm,tempSet,nClusters)
+            self.cluster(*clusterArgs,**kargs)
+            area2regions[tempSet] = self.region2areas
+            tempSetOrdered.append(tempSet)
+        else:
+            area2regions[tempSet] = cachedSolutions[tempSet][-1]
+            tempSetOrdered.append(tempSet)
         Y = self.getVars(*variables)
         t = []
         tb = []
         tw = []
         tw_t = []
-        for a2r in area2regions:
-            t2,tb2,tw2,tw_t2 = inequalityMultivar(Y,a2r,inequalityIndex)
+        for a2r in tempSetOrdered:
+            if a2r in cachedSolutions:
+                t2,tb2,tw2,tw_t2,a2rc = cachedSolutions[a2r]
+            else:
+                t2,tb2,tw2,tw_t2 = inequalityMultivar(Y,area2regions[a2r],inequalityIndex)
+                cachedSolutions[a2r] = t2,tb2,tw2,tw_t2,area2regions[a2r]
+                a2rc = area2regions[a2r]
             t.append(t2)
             tb.append(tb2)
             tw.append(tw2)
             tw_t.append(tw_t2)
+            area2regionsList.append(a2rc)
         
         lowerTw_t = [min(x) for x in zip(*tw_t)]
-        return t, tb, tw, tw_t, lowerTw_t,area2regions
+        return t, tb, tw, tw_t, lowerTw_t,area2regionsList
             
 
 
