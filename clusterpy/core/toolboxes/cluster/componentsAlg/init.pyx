@@ -356,13 +356,11 @@ class RegionMaker:
                 for s in uniqueInitSolution:
                     seeds.append(initialSolution.index(s))
                 self.setSeeds(seeds)
-                lseeds = len(seeds)
-                emptyList = [[]]*lseeds
-                regions2create = dict(enumerate(emptyList))
+                regions2create = {}
                 c = 0
 
                 for i in initialSolution:
-                    regions2create[i].append(c)
+                    regions2create.setdefault(i, []).append(c)
                     c += 1
                 c = 0
                 regions2createKeys = regions2create.keys()
