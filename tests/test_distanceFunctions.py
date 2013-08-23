@@ -12,9 +12,8 @@ __email__ = "contacto@rise-group.org"
 from clusterpy.core.toolboxes.cluster.componentsAlg.distanceFunctions import square_double
 
 def test_square_double_of_many_items_list():
-    """ Test square_double function
-    Squares each element of a list and then returns the sum
-    of all the squared elements.
+    """
+    Squares each element of a list and then returns the sum.
     """
     input_list = [-4, -3, 0, 1, 2, 3, 0.5]
     expected_ans = float(39.25)
@@ -22,10 +21,19 @@ def test_square_double_of_many_items_list():
     assert expected_ans == output
 
 def test_distance_area_2_area_euclidean_squared():
+    """
+    Test distances between areas using euclidean squared
+    """
     assert False
 
 def test_hamming_distance():
+    """
+    Test Hamming distance for areas.
+    """
     assert False
 
 def test_distance_area_2_area_hausdorff():
+    """
+    Test Hausdorff distance between areas.
+    """
     assert False
