@@ -10,30 +10,38 @@ __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
 from clusterpy.core.toolboxes.cluster.componentsAlg.distanceFunctions import square_double
+from unittest import TestCase
 
-def test_square_double_of_many_items_list():
-    """
-    Squares each element of a list and then returns the sum.
-    """
-    input_list = [-4, -3, 0, 1, 2, 3, 0.5]
-    expected_ans = float(39.25)
-    output = square_double(input_list)
-    assert expected_ans == output
+class TestDistanceFunctions(TestCase):
+    def setUp(self):
+        pass
 
-def test_distance_area_2_area_euclidean_squared():
-    """
-    Test distances between areas using euclidean squared
-    """
-    assert False
+    def tearDown(self):
+        pass
 
-def test_hamming_distance():
-    """
-    Test Hamming distance for areas.
-    """
-    assert False
+    def test_square_double_of_many_items_list(self):
+        """
+        Squares each element of a list and then returns the sum.
+        """
+        input_list = [-4, -3, 0, 1, 2, 3, 0.5]
+        expected_ans = float(39.25)
+        output = square_double(input_list)
+        assert expected_ans == output
 
-def test_distance_area_2_area_hausdorff():
-    """
-    Test Hausdorff distance between areas.
-    """
-    assert False
+    def test_distance_area_2_area_euclidean_squared(self):
+        """
+        Test distances between areas using euclidean squared
+        """
+        assert False
+
+    def test_hamming_distance(self):
+        """
+        Test Hamming distance for areas.
+        """
+        assert False
+
+    def test_distance_area_2_area_hausdorff(self):
+        """
+        Test Hausdorff distance between areas.
+        """
+        assert False
