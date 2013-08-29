@@ -25,7 +25,8 @@ def distanceA2AEuclideanSquared(list x, std=[],w=[]):
     """
     cdef list distance, d, sublist
     cdef double d2
-    cdef unsigned int numrows, row
+    cdef int numrows
+    cdef unsigned int row
     cdef numpy.ndarray npsublist
 
     if std:
