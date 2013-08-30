@@ -9,9 +9,9 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
+import cython
 import numpy
 cimport numpy
-import cython
 
 @cython.cfunc
 @cython.returns(cython.double)
@@ -22,7 +22,8 @@ def square_double(x):
         ans += i*i
     return ans
 
-def distanceA2AEuclideanSquared(list x, std=[],w=[]):
+@cython.locals(x=cython.list)
+def distanceA2AEuclideanSquared(x, std=[],w=[]):
     """
     This function calcule the Euclidean Squared distance between
     two or more variables.
@@ -56,6 +57,7 @@ def distanceA2AEuclideanSquared(list x, std=[],w=[]):
         distance[row] = [d2]
     return distance
 
+@cython.locals(X=cython.list, Y=cython.list)
 def getHammingDistance(X, Y):
     """
     CLUSTERPY
@@ -73,8 +75,8 @@ def getHammingDistance(X, Y):
     >>> getHammingDistance(X, Y)
     0.1875
     """
-
-    def recode(list X):
+    @cython.locals(X=cython.list)
+    def recode(X):
         """
         CLUSTERPY
         recode(n, m):
