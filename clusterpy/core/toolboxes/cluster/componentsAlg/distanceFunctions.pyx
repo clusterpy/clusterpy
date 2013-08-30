@@ -11,9 +11,13 @@ __email__ = "contacto@rise-group.org"
 
 import numpy
 cimport numpy
+import cython
 
-cdef double square_double(list x):
-    cdef double i, ans = 0.0
+@cython.cfunc
+@cython.returns(cython.double)
+@cython.locals(x=cython.list, ans=cython.double, i=cython.double)
+def square_double(x):
+    ans = 0.0
     for i in x:
         ans += i*i
     return ans
@@ -23,11 +27,13 @@ def distanceA2AEuclideanSquared(list x, std=[],w=[]):
     This function calcule the Euclidean Squared distance between
     two or more variables.
     """
-    cdef list distance, d, sublist
-    cdef double d2
-    cdef int numrows
-    cdef unsigned int row
-    cdef numpy.ndarray npsublist
+    distance = cython.declare(cython.list)
+    d = cython.declare(cython.list)
+    sublist = cython.declare(cython.list)
+    d2 = cython.declare(cython.double)
+    numrows = cython.declare(cython.int)
+    row = cython.declare(cython.uint)
+    npsublist = cython.declare(numpy.ndarray)
 
     if std:
         x = numpy.array(x)
@@ -110,7 +116,11 @@ def getHammingDistance(X, Y):
                 r = r + 1
         return XP
 
-    cdef int lenX, lenY, minLen, maxLen, distance
+    lenX = cython.declare(cython.int, 0)
+    lenY = cython.declare(cython.int, 0)
+    minLen = cython.declare(cython.int, 0)
+    maxLen = cython.declare(cython.int, 0)
+    distance = cython.declare(cython.int, 0)
 
     lenX = len(X)
     lenY = len(Y)
@@ -128,7 +138,6 @@ def getHammingDistance(X, Y):
             distance += 1
     return (maxLen - distance + 0.0)/maxLen
 
-
 def distanceA2AHausdorff(x, y):
     """
     This function calcule the Hausdorff distance between two 
@@ -140,10 +149,7 @@ def distanceA2AHausdorff(x, y):
     distance = max(distances) 
     return distance
 
-
-
 distMethods = {}
 distMethods['EuclideanSquared'] = distanceA2AEuclideanSquared
 distMethods['Hamming'] = getHammingDistance
 distMethods['Hausdorff'] = distanceA2AHausdorff
-
