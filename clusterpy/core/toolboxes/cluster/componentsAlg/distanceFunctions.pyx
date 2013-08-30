@@ -90,25 +90,23 @@ def getHammingDistance(X, Y):
         >>> recode([3, 1, 1, 0, 3, 0, 1, 0, 2, 0, 0, 3, 2, 2, 3, 3])
         [0, 1, 1, 2, 0, 2, 1, 2, 3, 2, 2, 0, 3, 3, 0, 0]
         """
-        cdef list XP, assigned
-        cdef unsigned int i, j, k, lenX
-        cdef int r
+        XP = cython.declare(cython.list, X + [])
+        i = cython.declare(cython.uint)
+        j = cython.declare(cython.uint)
+        k = cython.declare(cython.uint)
+        lenX = cython.declare(cython.uint, len(X))
+        r = cython.declare(cython.int, 0)
 
-        XP = X + []
-        assigned = []
-        r = 0
-        lenX = len(X)
+        assigned = {}
 
-        for i in range(lenX):
-            if (i not in assigned):
-                XP[i] = r
-                for j in range(lenX - i - 1):
-                    k = i + j + 1
-                    if (k not in assigned):
-                        if X[k] == X[i]:
-                            XP[k] = r
-                            assigned.append(k)
-                r = r + 1
+        for i in xrange(lenX):
+            if X[i] not in assigned:
+                assigned[X[i]] = r
+                r += 1
+
+        for i in xrange(lenX):
+            XP[i] = assigned[XP[i]]
+
         return XP
 
     lenX = cython.declare(cython.int, 0)
