@@ -46,7 +46,6 @@ def distanceA2AEuclideanSquared(list x, std=[],w=[]):
         x = x.tolist()
         
     numrows = len(x)
-#    numrows = numpy.shape(x)[0]
     distance = [0]*(numrows-1)
 
     for row in xrange(numrows - 1):
@@ -57,18 +56,13 @@ def distanceA2AEuclideanSquared(list x, std=[],w=[]):
         distance[row] = [d2]
     return distance
 
-
-
-
-# Distances between solutions
-
 def getHammingDistance(X, Y):
     """
     CLUSTERPY
     getDistanceHamming(X, Y, distanceType):
     Description of the function:
-    Return the hamming distance (similarity) of two solutions.
-    Parameters
+    Return the Hamming distance (similarity) of two solutions.
+    Parameters:
     X: Solution 1
     Y: Solution 2
     Outputs:
@@ -85,12 +79,13 @@ def getHammingDistance(X, Y):
         CLUSTERPY
         recode(n, m):
         Description of the function:
-        Recodify a array of numbers, putting the number according to the
-        position of the variable
+        Rename the values of the array according to the order of appearance.
+        First value is changed by zero and replaced all occurences, second by
+        1 and so on.
         Parameters
-        X: Array to recodify
+        X: Array to re-arrange
         Outputs:
-        XP: Array recodified
+        XP: Array
         Examples:
         >>> recode([3, 1, 1, 0, 3, 0, 1, 0, 2, 0, 0, 3, 2, 2, 3, 3])
         [0, 1, 1, 2, 0, 2, 1, 2, 3, 2, 2, 0, 3, 3, 0, 0]
