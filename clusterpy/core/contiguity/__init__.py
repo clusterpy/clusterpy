@@ -9,6 +9,7 @@ __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
 from weightsFromAreas import weightsFromAreas
+from intersections import fixIntersections
 from transformations import dict2matrix
 from transformations import dict2sparseMatrix
 from output import dict2gal, dict2csv

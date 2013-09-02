@@ -10,9 +10,10 @@ import imp
 path = os.path.split(__file__)[0]
 path = os.path.split(path)[0]
 path = os.path.split(path)[0]
-inputs = imp.load_source('inputs',path)
-componentsIO = imp.load_source('componentsIO',path)
-
+path = os.path.split(path)[0]
+sys.path += [path]
+import inputs
+from contiguity import weightsFromAreas
 
 def line2pointIntersection(line,point,tol):
     if line.distance(point) < tol:
@@ -30,7 +31,7 @@ def line2mpointsIntersection(line,mpoints,tol):
     return result
 
 class rimap():
-    def __init__(self,n=3600,N=30,alpha=[0.1,0.5],sigma=[1.2,1.5],dt=0.1,pg=0.1653,pu=0.4116,su=0.3997,boundary=""):
+    def __init__(self,n=3600,N=30,alpha=[0.1,0.5],sigma=[1.1,1.4],dt=0.1,pg=0.01,pu=0.05,su=0.315,boundary=""):
         """Creates an irregular maps
 
         :param n: number of areas 
@@ -71,13 +72,12 @@ class rimap():
         alp = 0.4
         sig = 1.2
         self.lAreas = 0
-        print dt
         if boundary == "":
             a,r,sa,sr,X1,times = mrpolygon(alp,sig,self.mu,self.X_0,self.dt,self.N)
             sa,sr = scalePolygon(sa,sr,1000)
             polygon = polarPolygon2cartesian(zip(sa,sr))
         else:
-            layer = inputs.importArcData(boundary)
+            layer = clusterpy.importArcData(boundary)
             polygon = layer.areas[0][0]
         polygon = Polygon(polygon)
         self.areasPerLevel = {}
@@ -93,7 +93,7 @@ class rimap():
             self.carteAreas.append([a])
         print "closing: " + str(len(self.carteAreas))
 
-    def postCorrectionDissolve(self,areas,nAreas,areaUnion):
+    def postCorrectionDissolve(self,areas,nAreas):
         def deleteAreaFromW(areaId,newId,W):
             neighs = W[areaId]
             W.pop(areaId)
@@ -107,12 +107,12 @@ class rimap():
             W[newId].remove(newId)
             return W
         pos = 0
-        Wrook, Wqueen = componentsIO.WfromPolig(areas)
+        Wrook, Wqueen = weightsFromAreas(areas)
         aIds = filter(lambda x: len(Wrook[x])>0,Wrook.keys())
         aIds0 = filter(lambda x: len(Wrook[x])==0,Wrook.keys())
         areas = [areas[x] for x in aIds]
         areas.sort(key = lambda x: len(x[0]))
-        Wrook, Wqueen = componentsIO.WfromPolig(areas)
+        Wrook, Wqueen = weightsFromAreas(areas)
         availableAreas = Wrook.keys()
         end = False
         pos = availableAreas.pop(0)
@@ -121,21 +121,18 @@ class rimap():
             area = areas[id2pos.index(pos)]
             if len(Wrook[pos]) > 0:
                 neighs = Wrook[pos]
-                neighs.sort(key=lambda x: areas[id2pos.index(x)].area())
-                neighs.reverse()
+                neighs.sort(key=lambda x: areas[id2pos.index(x)].area(),reverse=True)
                 for k,nneigh in enumerate(neighs):
                     neigh = areas[id2pos.index(nneigh)]
                     narea = area | neigh
                     if len(narea) == 1:
                         areas[id2pos.index(nneigh)] = narea
-                        Wrook = deleteAreaFromW(pos,nneigh,Wrook)
                         areas.pop(id2pos.index(pos))
                         id2pos.remove(pos)
-                        try:
-                            availableAreas.remove(pos)
-                        except:
-                            pass
+                        Wrook = deleteAreaFromW(pos,nneigh,Wrook) # El error puede estar aca
                         break
+                    else:
+                        pass
                 if len(areas) == nAreas:
                     end = True
                     break
@@ -148,16 +145,11 @@ class rimap():
                 Wrook.pop(pos)
                 area = areas.pop(id2pos.index(pos))
                 id2pos.remove(pos)
-                try:
-                    availableAreas.remove(pos)
-                except:
-                    pass
                 if len(availableAreas) > 0:
                     pos = availableAreas.pop(0)
                 else:
                     end = True
-
-        return areas,areaUnion
+        return areas
 
     def postCorrectionHoles(self,polygon,areas):
         exterior = fillHoles(polygon)
@@ -205,44 +197,90 @@ class rimap():
                 areaOrder.sort(key=lambda x: areas[x].area(),reverse=True)
                 na = areaOrder[0]
                 #na = numpy.random.randint(0,len(areas))
+                if areas[na][0][0] != areas[na][0][-1]:
+                    areas[na] = Polygon([x for x in areas[na][0]] + [areas[na][0][0]])
                 area = areas[na]
                 bbox = area.boundingBox()
-                f1 = numpy.random.randint(0,4)
-                f2 = (f1 + numpy.random.randint(0,3))%4
-                faces = [f1,f2]
-                faces.sort()
-                p1 = getPointInFace(faces[0],bbox)
-                p2 = getPointInFace(faces[1],bbox)
+                bboxp = Polygon([(bbox[0]-1,bbox[2]-1),(bbox[0]-1,bbox[3]+1),
+                               (bbox[1]+1,bbox[3]+1),(bbox[1]+1,bbox[2]-1),
+                               (bbox[0]-1,bbox[2]-1)])
+                bbox = bboxp.boundingBox()
+                inside = False
+                errors = 0
+                warnings = 0
+                i = 0
+                while not inside:
+                    if errors == 20 and na +1 < len(areas):
+                        i += 1
+                        na = areaOrder[i]
+                        if areas[na][0][0] != areas[na][0][-1]:
+                            areas[na] = Polygon([x for x in areas[na][0]] + [areas[na][0][0]])
+                        area = areas[na]
+                        bbox = area.boundingBox()
+                        bboxp = Polygon([(bbox[0]-1,bbox[2]-1),(bbox[0]-1,bbox[3]+1),
+                                       (bbox[1]+1,bbox[3]+1),(bbox[1]+1,bbox[2]-1),
+                                       (bbox[0]-1,bbox[2]-1)])
+                        bbox = bboxp.boundingBox()
+                        errors = 0
+
+                    f1 = numpy.random.randint(0,4)
+                    f2 = (f1 + numpy.random.randint(1,4))%4
+                    faces = [f1,f2]
+                    faces.sort()
+                    p1 = getPointInFace(faces[0],bbox)
+                    if f1%2 == 0:
+                        p2 = (p1[0],p1[1]+1)
+                    else:    
+                        p2 = (p1[0]+1,p1[1])
+                    p3 = getPointInFace(faces[1],bbox)
+                    if f2%2 == 0:
+                        p4 = (p3[0],p3[1]+1)
+                    else:    
+                        p4 = (p3[0]+1,p3[1])
+                    line = Polygon([p1,p2,p3,p4,p1])
+                    inters = area & line
+                    parts = line - area
+                    if len(parts) == 2 and inters.area() >= line.area()*0.2 :
+                        inside = True
+                    else:
+                        errors += 1
+
                 divPolygon = [p1]
-                for i in range(f1,f2):
+                for i in range(*faces):
                     c1,c2 = getCornersOfFace(i,bbox)
                     divPolygon.append(c2)
-                divPolygon.append(p2)
+                divPolygon.append(p3)
                 divPolygon.append(p1)
                 divPolygon = Polygon(divPolygon)
                 polygon1 = divPolygon & area
-                if len(polygon1) > 1:
-                    pl = [Polygon(x) for x in polygon1]
-                    pl.sort(key=lambda x: x.area())
-                    polygon1 = pl[-1]
+                divPolygon = bboxp - divPolygon
                 polygon2 = area - polygon1
-                if len(polygon2) > 1:
-                    pl = [Polygon(x) for x in polygon2]
-                    pl.sort(key=lambda x: x.area())
-                    polygon2 = pl[-1]
-
-                if polygon1.area() > 0 and polygon2.area() > 0 and polygon1.area() + polygon2.area() == area.area():
+                if len(polygon1) == 1 and \
+                   len(polygon2) == 1 and \
+                   polygon1.area() > 0 and \
+                   polygon2.area() > 0 and \
+                   abs(polygon1.area() + polygon2.area() - area.area()) <= 0.01:
+                    warnings = 0
+                    areas.pop(na)
+                    areas.append(polygon1)
+                    areas.append(polygon2)
                     end = True
-            areas.pop(na)
-            areas.append(polygon1)
-            areas.append(polygon2)
+                else:
+                    warnings += 1
+                    areas_aux = areas[na] & areas[na]
+                    if areas_aux > 1:
+                        areas_aux = [Polygon(x) for x in areas_aux]
+                        areas_aux.sort(key=lambda k: k.area(),reverse=True)
+                        areas_aux = areas_aux[0]
+
+                    while len(areas_aux) == 0:
+                        areas_aux.sort(key=lambda k: k.area(),reverse=True)
+                        areas_aux = Polygon(areas_aux[0])
+                        areas_aux = areas_aux & areas_aux
+                    areas[na] = areas_aux
         return areas
 
     def dividePolygon(self,polygon,coveredArea,k,fill,rec=1):
-        """
-            k = numero de polygonos
-            fill = cantidad minima a cubrir
-        """
         if k == 1:
             areas = [polygon]
             areaUnion = polygon
@@ -325,24 +363,23 @@ class rimap():
                             areas += areasi
                             uncoveredArea = polygon - coveredArea
         areas = self.postCorrectionHoles(areaUnion,areas)
-        la = len(areas)
+        areas.sort(key=lambda x: x.area())
         nAreas = []
         for nx, x in enumerate(areas):
             add = True
-            for nx2, x2 in enumerate(areas):
-                if x2.covers(x) and nx != nx2:
-                    add = False
-                    break
+            for nx2, x2 in enumerate(areas[nx+1:]):
+                if x2.overlaps(x):
+                    if x2.covers(x):
+                        add = False
+                        break
+                    else:
+                        x = x - x2
             if add:
                 nAreas.append(x)
-        l1 = len(areas)
         areas = nAreas
-        l2 = len(areas)
         if len(areas) < k:
             areas = self.postDividePolygons(areas,k)
         if len(areas) > k:
-            areas, areaUnion = self.postCorrectionDissolve(areas,k,areaUnion)
+            areas = self.postCorrectionDissolve(areas,k)
         coveredArea = fillHoles(areaUnion)
-        l3 = len(areas)
-        print self.lAreas
         return areas, coveredArea
