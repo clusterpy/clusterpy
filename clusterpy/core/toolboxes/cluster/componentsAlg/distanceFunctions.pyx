@@ -45,16 +45,15 @@ def distanceA2AEuclideanSquared(x, std=[],w=[]):
         w = w / float(numpy.add.reduce(w))
         x = x * w  #  weights
         x = x.tolist()
-        
+
     numrows = len(x)
     distance = [0]*(numrows-1)
 
     for row in xrange(numrows - 1):
-        npsublist = numpy.subtract(x[row], x[(row + 1):numrows])
+        npsublist = numpy.subtract(x[row], x[row + 1])
         sublist = npsublist.tolist()
-        d2 = square_double(sublist[0])
+        distance[row] = [square_double(sublist)]
 
-        distance[row] = [d2]
     return distance
 
 @cython.locals(X=cython.list, Y=cython.list)
