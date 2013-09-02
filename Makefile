@@ -5,7 +5,7 @@ PIP=pip
 all:
 	$(PY) setup.py build_ext --inplace
 
-test:
+test: clean all
 	nosetests
 
 requirements:
