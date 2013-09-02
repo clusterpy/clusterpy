@@ -13,9 +13,9 @@ __all__ = ['new','load','importArcData','createPoints','createHexagonalGrid',
 import struct
 import cPickle
 import re
-from contiguity import weightsFromAreas
+from contiguity import weightsFromAreas, fixIntersections
 from layer import Layer
-#from toolboxes import rimap as rim
+from toolboxes import rimap as rim
 
 
 # INDEX
@@ -32,30 +32,36 @@ from layer import Layer
 # importDBF
 # importGWT
 
-def rimap(n,N=30,alpha=[0.1,0.5],sigma=[1.2,1.5],dt=0.1,pg=0.1653,pu=0.4116,su=0.3997,boundary=""):
+def rimap(n,N=30,alpha=[0.01,0.3],sigma=[1.1,1.4],dt=0.1,pg=0.01,pu=0.05,su=0.315,boundary=""):
     """Creates an irregular maps
 
-    :param n: number of areas 
-    :type n: integer
-    :param N: number of points sampled from each irregular polygon (MR-Polygon) 
-    :type N: integer
-    :param alpha: min and max value to sampled alpha; default is (0.1,0.5)
-    :type alpha: List
-    :param sigma: min and max value to sampled sigma; default is (1.2,1.5)
-    :type sigma: List
-    :param dt: time delta to be used to create irregular polygons (MR-Polygons)
-    :type dt: Float
-    :param pg: parameter to define the scaling factor of each polygon before being introduced as part of the irregular map
-    :type pg: Float
-    :param pu: parameter to define the probability of increase the number of areas of each polygon before being introduced into the irregular map
-    :type pu: Float
-    :param su: parameter to define how much is increased the number of areas of each polygon before being introduced into the irregular map
-    :type su: Float
-    :param boundary: Initial irregular boundary to be used into the recursive irregular map algorithm
-    :type boundary: Layer
+        :param n: number of areas 
+        :type n: integer
+        :param N: number of points sampled from each irregular polygon (MR-Polygon) 
+        :type N: integer
+        :param alpha: min and max value to sampled alpha; default is (0.1,0.5)
+        :type alpha: List
+        :param sigma: min and max value to sampled sigma; default is (1.2,1.5)
+        :type sigma: List
+        :param dt: time delta to be used to create irregular polygons (MR-Polygons)
+        :type dt: Float
+        :param pg: parameter to define the scaling factor of each polygon before being introduced as part of the irregular map
+        :type pg: Float
+        :param pu: parameter to define the probability of increase the number of areas of each polygon before being introduced into the irregular map
+        :type pu: Float
+        :param su: parameter to define how much is increased the number of areas of each polygon before being introduced into the irregular map
+        :type su: Float
+        :param boundary: Initial irregular boundary to be used into the recursive irregular map algorithm
+        :type boundary: Layer
 
-    :rtype: Layer
-    :return: RI-Map instance 
+        :rtype: Layer
+        :return: RI-Map instance 
+
+        **Examples** ::
+
+            import clusterpy
+            lay = clusterpy.rimap(1000)
+            lay.exportArcData("rimap_1000")
     """
 
     rm = rim(n,N,alpha,sigma,dt,pg,pu,su,boundary)

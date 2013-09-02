@@ -50,9 +50,6 @@ def weightsFromAreas(AREAS):
                 p2 = tuple(map(lambda x: round(x,3),ring[p + 1]))
                 segment = [p1, p2]
                 segment.sort(key=lambda x: x[0]**2 + x[1]**2)
-                #if a == 30:
-                #    import pdb
-                #    pdb.set_trace()
                 sortSegment = tuple(segment)
                 if segment2areas.has_key(sortSegment):
                     segment2areas[sortSegment] += [a]
