@@ -15,7 +15,7 @@ import cPickle
 import re
 from contiguity import weightsFromAreas
 from layer import Layer
-#from toolboxes import rimap as rim
+from toolboxes import rimap as rim
 
 
 # INDEX
