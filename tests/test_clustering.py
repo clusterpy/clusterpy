@@ -3,7 +3,8 @@ Testing clustering algorithms in Clusterpy -Arisel-
 ** All the following tests take considerable time to complete **
 """
 
-from unittest import TestCase, skip
+from unittest import TestCase
+from nose.plugins.attrib import attr
 import clusterpy
 from numpy.random import seed as make_static_random
 
@@ -21,7 +22,7 @@ class TestArisel(TestCase):
         # Remove generated output/Arc data
         pass
 
-    @skip
+    @attr('slow')
     def test_arisel_never_breaks_contiguity(self):
         """
         Tests that the output regions never break the contiguity constraint.
@@ -41,7 +42,7 @@ class TestArisel(TestCase):
 
         assert False
 
-    @skip
+    @attr('slow')
     def test_arisel_gives_at_least_same_obj_func(self):
         """
         Tests that the objective function is at least the same, but not worse.

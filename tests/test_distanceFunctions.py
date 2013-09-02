@@ -18,7 +18,7 @@ class TestDistanceFunctions(TestCase):
 
     def tearDown(self):
         pass
-
+    @skip
     def test_square_double_of_many_items_list(self):
         """
         Squares each element of a list and then returns the sum.
