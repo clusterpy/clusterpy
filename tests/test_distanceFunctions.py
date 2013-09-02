@@ -19,6 +19,18 @@ class TestDistanceFunctions(TestCase):
     def tearDown(self):
         pass
 
+    @skip
+    def test_square_double_of_many_items_list(self):
+        """
+        Squares each element of a list and then returns the sum.
+        """
+        square_double = distanceFunctions.square_double
+
+        input_list = [-4, -3, 0, 1, 2, 3, 0.5]
+        expected_out = float(39.25)
+        output = square_double(input_list)
+        assert expected_out == output
+
     def test_distance_area_2_area_euclidean_squared(self):
         """
         Test distances between areas using euclidean squared
