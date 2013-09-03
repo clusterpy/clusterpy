@@ -7,6 +7,7 @@ from unittest import TestCase
 from nose.plugins.attrib import attr
 import clusterpy
 from numpy.random import seed as make_static_random
+from clusterpy.core.toolboxes.cluster.componentsAlg import AreaManager
 
 map_type = 'n100'
 into_regions = 10
@@ -38,9 +39,9 @@ class TestArisel(TestCase):
         clustering_results = instance.outputCluster[exp_name]
         final_region_assignment = clustering_results['r2a']
 
-        # Check contiguity of 'final_region_assignment'
-
-        assert False
+        am = AreaManager(instance.Wrook, instance.Y)
+        feasible = am.checkFeasibility(final_region_assignment)
+        self.assertTrue(feasible)
 
     @attr('slow')
     def test_arisel_gives_at_least_same_obj_func(self):
