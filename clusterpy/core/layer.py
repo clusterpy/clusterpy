@@ -1239,7 +1239,7 @@ algorithm"
         if dissolve == 1:
             self.dissolveMap(dataOperations=dataOperations)
 
-    def multishockFinder(self,variables,minShocks,maxShocks,
+    def spmorph(self,variables,minShocks,maxShocks,
                         inequalityIndex,outFile,clusterAlgorithm,
                         nClusters, **kargs):
         """
@@ -1277,7 +1277,7 @@ algorithm"
             import clusterpy
             china = clusterpy.importArcData("clusterpy/data_examples/china")
             variables = ['Y1978', 'Y1979', 'Y1980', 'Y1981']
-            china.multishockFinder(variables,0,2,'theil',"multishocktable",'azpTabu',4)
+            china.multishockFinder(variables,0,2,'theil',"sphmorph",'azpTabu',4)
         """
         def createTable(index,comb,shock):
             auxline = str(index)
