@@ -1,6 +1,6 @@
 # encoding: latin2
 """
-Test distance functions 
+Test distance functions
 """
 __author__ = "Juan C. Duque"
 __credits__ = "Copyright (c) 2009-11 Juan C. Duque"
@@ -19,7 +19,6 @@ class TestDistanceFunctions(TestCase):
     def tearDown(self):
         pass
 
-    @skip
     def test_square_double_of_many_items_list(self):
         """
         Squares each element of a list and then returns the sum.
