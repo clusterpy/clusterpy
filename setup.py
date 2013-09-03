@@ -1,15 +1,5 @@
 from distutils.core import setup
 from distutils.extension import Extension
-from Cython.Distutils import build_ext
-
-import numpy
-
-ALGPATH = "clusterpy/core/toolboxes/cluster/componentsAlg/"
-ALGPKG = "clusterpy.core.toolboxes.cluster.componentsAlg."
-
-CLUSPATH = "clusterpy/core/toolboxes/cluster/"
-CLUSPKG = "clusterpy.core.toolboxes.cluster."
-
 
 setup(
         name='clusterPy',
@@ -24,17 +14,4 @@ setup(
                   'clusterpy.core.geometry','clusterpy.core.toolboxes',
                   'clusterpy.core.toolboxes.cluster',
                   'clusterpy.core.toolboxes.cluster.componentsAlg'],
-        ext_modules = [Extension(CLUSPKG+"arisel", [CLUSPATH+"arisel.pyx"],
-                                 extra_link_args=['-fopenmp'],
-                                 extra_compile_args=['-fopenmp']
-                                 ),
-                       Extension(ALGPKG+"distanceFunctions", [ALGPATH+"distanceFunctions.pyx"]),
-		       Extension(ALGPKG+"dist2Regions", [ALGPATH+"dist2Regions.pyx"]),
-		       Extension(ALGPKG+"selectionTypeFunctions", [ALGPATH+"selectionTypeFunctions.pyx"]),
-                       Extension(ALGPKG+"init", [ALGPATH+"init.pyx"]),
-                       Extension(ALGPKG+"objFunctions", [ALGPATH+"objFunctions.pyx"])
-                       ],
-        cmdclass = {'build_ext': build_ext}
-        
-        
         )
