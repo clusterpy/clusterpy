@@ -9,32 +9,25 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import cython
 import numpy
-cimport numpy
 
-@cython.cfunc
-@cython.returns(cython.double)
-@cython.locals(x=cython.list, ans=cython.double, i=cython.double)
 def square_double(x):
     ans = 0.0
     for i in x:
         ans += i*i
     return ans
 
-@cython.locals(x=cython.list)
 def distanceA2AEuclideanSquared(x, std=[],w=[]):
     """
     This function calcule the Euclidean Squared distance between
     two or more variables.
     """
-    distance = cython.declare(cython.list)
-    d = cython.declare(cython.list)
-    sublist = cython.declare(cython.list)
-    d2 = cython.declare(cython.double)
-    numrows = cython.declare(cython.int)
-    row = cython.declare(cython.uint)
-    npsublist = cython.declare(numpy.ndarray)
+    distance = []
+    d = []
+    sublist = []
+    d2 = 0.0
+    numrows = 0
+    row = 0
 
     if std:
         x = numpy.array(x)
@@ -56,7 +49,6 @@ def distanceA2AEuclideanSquared(x, std=[],w=[]):
 
     return distance
 
-@cython.locals(X=cython.list, Y=cython.list)
 def getHammingDistance(X, Y):
     """
     CLUSTERPY
@@ -74,7 +66,6 @@ def getHammingDistance(X, Y):
     >>> getHammingDistance(X, Y)
     0.1875
     """
-    @cython.locals(X=cython.list)
     def recode(X):
         """
         CLUSTERPY
@@ -91,12 +82,12 @@ def getHammingDistance(X, Y):
         >>> recode([3, 1, 1, 0, 3, 0, 1, 0, 2, 0, 0, 3, 2, 2, 3, 3])
         [0, 1, 1, 2, 0, 2, 1, 2, 3, 2, 2, 0, 3, 3, 0, 0]
         """
-        XP = cython.declare(cython.list, X + [])
-        i = cython.declare(cython.uint)
-        j = cython.declare(cython.uint)
-        k = cython.declare(cython.uint)
-        lenX = cython.declare(cython.uint, len(X))
-        r = cython.declare(cython.int, 0)
+        XP = X + []
+        i = 0
+        j = 0
+        k = 0
+        lenX = len(X)
+        r = 0
 
         assigned = {}
 
@@ -110,11 +101,11 @@ def getHammingDistance(X, Y):
 
         return XP
 
-    lenX = cython.declare(cython.int, 0)
-    lenY = cython.declare(cython.int, 0)
-    minLen = cython.declare(cython.int, 0)
-    maxLen = cython.declare(cython.int, 0)
-    distance = cython.declare(cython.int, 0)
+    lenX = 0
+    lenY = 0
+    minLen = 0
+    maxLen = 0
+    distance = 0
 
     lenX = len(X)
     lenY = len(Y)

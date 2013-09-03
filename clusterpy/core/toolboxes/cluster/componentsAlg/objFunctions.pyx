@@ -37,14 +37,14 @@ def getObjectiveFunctionSumSquares(RegionMaker, region2AreaDict, indexData=[]):
     return obj
 
 cachedObj = {}
-def getObjectiveFunctionSumSquaresFast(RegionMaker, region2AreaDict, list modifiedRegions, list indexData=[]):
+def getObjectiveFunctionSumSquaresFast(RegionMaker, region2AreaDict, modifiedRegions, indexData=[]):
     """
     Sum of squares from each area to the region's centroid
     """
-    cdef double obj = 0.0, valRegion = 0.0, dist
-    cdef list r2aDictKeys = region2AreaDict.keys()
-    cdef unsigned int region, aID, index
-    cdef list areasIdsIn, areasInNow, dataAvg, areaData, areaDataList
+    obj = 0.0, valRegion = 0.0, dist = 0.0
+    r2aDictKeys = region2AreaDict.keys()
+    region = 0, aID = 0, index = 0
+    areasIdsIn = [], areasInNow = [], dataAvg = [], areaData = [], areaDataList = []
     for region in r2aDictKeys:
         if region in modifiedRegions:
             valRegion = 0.0

@@ -98,8 +98,13 @@ def execArisel(y, w, unsigned int pRegions, unsigned int inits=3, list initialSo
     ID variable is added to the dissolved map.
 
     """
-    cdef unsigned int lenY = len(y), i
-    cdef double start, time1, time2, extendedMemoryObjInfo, rmObjInfo
+    lenY = len(y)
+    i = 0
+    start = 0.0
+    time1 = 0.0
+    time2 = 0.0
+    extendedMemoryObjInfo = 0.0
+    rmObjInfo = 0.0
 
     print "Running original Arisel algorithm"
     print "Number of areas: ", lenY
@@ -116,10 +121,10 @@ def execArisel(y, w, unsigned int pRegions, unsigned int inits=3, list initialSo
 
     if convTabu <= 0:
         convTabu = lenY/pRegions  #   convTabu = 230*numpy.sqrt(pRegions)
-    cdef char* distanceType = "EuclideanSquared" 
-    cdef char* distanceStat = "Centroid"
-    cdef char* objectiveFunctionType = "SS"
-    cdef char* selectionType = "Minimum"
+    distanceType = "EuclideanSquared" 
+    distanceStat = "Centroid"
+    objectiveFunctionType = "SS"
+    selectionType = "Minimum"
     am = AreaManager(w, y, distanceType)
     extendedMemory = ExtendedMemory() 
 
