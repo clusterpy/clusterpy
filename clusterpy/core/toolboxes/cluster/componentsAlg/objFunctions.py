@@ -41,10 +41,18 @@ def getObjectiveFunctionSumSquaresFast(RegionMaker, region2AreaDict, modifiedReg
     """
     Sum of squares from each area to the region's centroid
     """
-    obj = 0.0, valRegion = 0.0, dist = 0.0
+    obj = 0.0
+    valRegion = 0.0
+    dist = 0.0
     r2aDictKeys = region2AreaDict.keys()
-    region = 0, aID = 0, index = 0
-    areasIdsIn = [], areasInNow = [], dataAvg = [], areaData = [], areaDataList = []
+    region = 0
+    aID = 0
+    index = 0
+    areasIdsIn = []
+    areasInNow = []
+    dataAvg = []
+    areaData = []
+    areaDataList = []
     for region in r2aDictKeys:
         if region in modifiedRegions:
             valRegion = 0.0

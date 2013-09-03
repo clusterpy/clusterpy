@@ -143,7 +143,9 @@ class AreaManager:
         Checks feasibility of a candidate solution
         """
         emptyList = []
-        n = len(solution), i = 0, r = 0
+        n = len(solution)
+        i = 0
+        r = 0
         feasible = 0
         regions = {}
         for i in range(n):
@@ -248,10 +250,10 @@ class RegionMaker:
                  distanceType = "EuclideanSquared", 
                  distanceStat = "Centroid",
                  selectionType = "Minimum",
-                 alpha = <float>0.2,
+                 alpha = 0.2,
                  numRegionsType = "Exogenous",
                  objectiveFunctionType = "SS",
-                 threshold = <float>0.0,
+                 threshold = 0.0,
                  weightsDistanceStat = [],
                  weightsObjectiveFunctionType = [],
                  indexDataStat = [],
@@ -335,10 +337,15 @@ class RegionMaker:
 
         #  PREDEFINED NUMBER OF REGIONS
 
-        seeds = [], regions2createKeys = [], emptyList = []
-        c = 0, lenUnassAreas = len(self.unassignedAreas)
-        s = 0, i = 0, lseeds = 0
-        if numRegionsType == <char*>"Exogenous":
+        seeds = []
+        regions2createKeys = []
+        emptyList = []
+        c = 0
+        lenUnassAreas = len(self.unassignedAreas)
+        s = 0
+        i = 0
+        lseeds = 0
+        if numRegionsType == "Exogenous":
             if not initialSolution:
                 self.pRegions = pRegions
                 seeds = self.kmeansInit()
@@ -1878,7 +1885,7 @@ class AreaCl:
                     index += 1
             self.data = data[0: int(n + 1)]
     
-    def returnDistance2Area(self, otherArea, distanceType="EuclideanSquared", list indexData=[]):
+    def returnDistance2Area(self, otherArea, distanceType="EuclideanSquared", indexData=[]):
         """
         Return the distance between the area and other area
         """

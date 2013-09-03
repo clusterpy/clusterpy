@@ -30,7 +30,7 @@ def constructPossible(am, pRegions, initialSolution, distanceType, distanceStat,
 #    par_queue.put(rm)
 
 
-def execArisel(y, w, unsigned int pRegions, unsigned int inits=3, list initialSolution=[], unsigned int convTabu=0, unsigned int  tabuLength=10):
+def execArisel(y, w, pRegions, inits=3, initialSolution=[], convTabu=0, tabuLength=10):
     """Automatic Rationalization with Initial Seed Location
 
     ARiSeL, proposed by [Duque_Church2004]_ , aggregates N areas into P

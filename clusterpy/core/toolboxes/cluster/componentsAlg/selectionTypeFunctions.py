@@ -16,10 +16,16 @@ def minimumSelection(RegionMaker):
     """
     Select and assign the nearest area to a region
     """
-    nInd = 0, minIndex = 0, idx = 0, it = 0 #iterator
-    rid = 0, aid = 0
-    val = 0.0, minVal = 0.0
-    values = [], indicesMin = []
+    nInd = 0
+    minIndex = 0
+    idx = 0
+    it = 0 #iterator
+    rid = 0
+    aid = 0
+    val = 0.0
+    minVal = 0.0
+    values = []
+    indicesMin = []
     keys = RegionMaker.candidateInfo.keys()
 
     if keys:
