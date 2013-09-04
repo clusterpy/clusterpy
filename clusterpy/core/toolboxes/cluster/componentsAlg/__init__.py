@@ -142,11 +142,7 @@ class AreaManager:
         """
         Checks feasibility of a candidate solution
         """
-        emptyList = []
         n = len(solution)
-        i = 0
-        r = 0
-        feasible = 0
         regions = {}
         for i in range(n):
             try:
@@ -156,24 +152,19 @@ class AreaManager:
         feasible = 1
         r = len(regions)
         for i in range(r):
-            newRegion = set([])
-            areas2Eval = regions[i]
-            if len(areas2Eval) > 1:
+            if len(regions[i]) > 0:
+                newRegion = set([regions[i][0]])
+                areas2Eval = set([regions[i][0]])
 
-                emptyList = []
-                for area in areas2Eval:
-                    emptyList.extend(self.areas[area].neighs)
-
-#                for area in areas2Eval:
-#                    newRegion = newRegion | (set(self.areas[area].neighs) & set(areas2Eval))
-#                newRegion = set(emptyList) & set(areas2Eval)
-                    #newRegion = newRegion | (set() & set(areas2Eval))
-
-                if set(areas2Eval) - set(emptyList):
+                while(len(areas2Eval) > 0):
+                    area = areas2Eval.pop()
+                    areaNeighs = (set(self.areas[area].neighs) & set(regions[i]))
+                    areas2Eval = areas2Eval | (areaNeighs - newRegion)
+                    newRegion = newRegion | areaNeighs
+                if set(regions[i]) -newRegion != set([]):
                     feasible = 0
                     break
         return feasible
-
 
 class BasicMemory:
     """
