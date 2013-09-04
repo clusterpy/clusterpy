@@ -14,3 +14,4 @@ run_perf.sh
 *.prof
 *.condor
 *.dag
+*.log
