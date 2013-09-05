@@ -11,9 +11,7 @@ from clusterpy.core.toolboxes.cluster.componentsAlg import RegionMaker
 class TestRegionMaker(TestCase):
     def setUp(self):
 
-        self.Y = {0:[pi], 1:[pi], 2:[pi],
-                  3:[pi], 4:[pi], 5:[pi],
-                  6:[pi], 7:[pi]}
+        self.Y = {i:[pi*i] for i in xrange(8)}
 
         """
         Simple map of 6 Areas.
