@@ -15,7 +15,19 @@ import cPickle
 import re
 from contiguity import weightsFromAreas, fixIntersections
 from layer import Layer
-from toolboxes import rimap as rim
+try:
+    import Polygon
+except:
+    pass
+    print "Irregular maps creator is not available because Polygon is not installed"
+else:
+    try:
+        import scipy
+    except:
+        pass
+        print "Irregular maps creator is not available because scipy is not installed"
+    else:
+        from toolboxes import rimaps as rim
 
 
 # INDEX

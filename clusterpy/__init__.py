@@ -1,17 +1,5 @@
 # encoding: latin2
 print "ClusterPy: Library of spatially constrained clustering algorithms"
-try:
-    import Polygon
-except:
-    pass
-    print "Irregular maps creator is not available because Polygon is not installed"
-
-try:
-    import scipy
-except:
-    pass
-    print "Irregular maps creator is not available because scipy is not installed"
-
 
 from core import *
 from core import contiguity
