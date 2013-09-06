@@ -5,43 +5,66 @@ Tests for one of the core classes in clusterpy. Region Maker.
 
 from unittest import TestCase, skip
 from math import pi
+from clusterpy import importArcData
 from clusterpy.core.toolboxes.cluster.componentsAlg import AreaManager
 from clusterpy.core.toolboxes.cluster.componentsAlg import RegionMaker
 
+map_type = 'n100'
+max_num_regions = 10
+sample_input_path = "clusterpy/data_examples/" + map_type
+
 class TestRegionMaker(TestCase):
     def setUp(self):
+        map_instance = importArcData(sample_input_path)
 
-        self.Y = {i:[pi*i] for i in xrange(8)}
-
-        """
-        Simple map of 6 Areas.
-
-        0123
-        4567
-        """        
-        self.Wrook = {0:[1, 4],
-                      1:[0, 2, 5],
-                      2:[1, 3, 6],
-                      3:[2, 7],
-                      4:[0, 5],
-                      5:[1, 4, 6],
-                      6:[2, 5, 7],
-                      7:[3, 6]}
-
-        self.Wqueen = {0:[1, 4, 5],
-                       1:[0, 2, 4, 5, 6],
-                       2:[1, 3, 5, 6, 7],
-                       3:[2, 6, 7],
-                       4:[0, 1, 5],
-                       5:[0, 1, 2, 4, 6],
-                       6:[1, 2, 3, 5, 7],
-                       7:[2, 3, 6]}
+        self.Y = map_instance.Y
+        self.Wrook = map_instance.Wrook
+        self.Wqueen = map_instance.Wqueen
 
     def tearDown(self):
         pass
 
     @skip
-    def test_grow_contiguos_regions_in_region_maker_init(self):
+    def test_construct_regions_method(self):
+        self.assertTrue(False)
+
+    def test_grow_exogenous_regions_rook(self):
+        """Number of regions is exogenous, aka given (Wrook)"""
+        am = AreaManager(self.Wrook, self.Y)
+
+        for regions in xrange(1, max_num_regions):
+            rm = RegionMaker(am, pRegions=regions)
+            self.assertEqual(regions, len(rm.region2Area))
+            self.assertTrue(am.checkFeasibility(rm.returnRegions()))
+
+    def test_grow_exogenous_regions_queen(self):
+        """Number of regions is exogenous, aka given (Wqueen)"""
+        am = AreaManager(self.Wqueen, self.Y)
+
+        for regions in xrange(1, max_num_regions):
+            rm = RegionMaker(am, pRegions=regions)
+            self.assertEqual(regions, len(rm.region2Area))
+            self.assertTrue(am.checkFeasibility(rm.returnRegions()))
+
+    @skip
+    def test_grow_exogenous_regions_with_initial_solution(self):
+        """Number of regions is exogenous, aka given, and an initial solution"""
+        am = AreaManager(self.Wqueen, self.Y)
+        rm = RegionMaker(am)
+
+        self.assertIsNotNone(rm)
+
+    @skip
+    def test_grow_endogenous_threshold_regions(self):
+        """Number of regions is endogenous with a threshold value"""
+        am = AreaManager(self.Wqueen, self.Y)
+        rm = RegionMaker(am)
+
+        self.assertIsNotNone(rm)
+
+    @skip
+    def test_grow_endogenous_range_regions(self):
+        """Number of regions is endogenous with a range value"""
         am = AreaManager(self.Wqueen, self.Y)
         rm = RegionMaker(am)
 
