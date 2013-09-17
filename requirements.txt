@@ -1,7 +1,5 @@
 Cython
-matplotlib
 numpy
-redis
 wsgiref
 nose
 scipy
