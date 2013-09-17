@@ -281,7 +281,6 @@ class RegionMaker:
         @type threshold: float
         @keyword threshold: Minimum population threshold to be satisfied for each region
 
-        # FIXME: estos atributos no se que son y lee porfa las funciones de esta clase que no estan muy completas las descripciones pues no sabia bien que hacian algunas.
         @type weightsDistanceStat: list
         @keyword weightsDistanceStat: 
 
@@ -859,9 +858,6 @@ class RegionMaker:
             return distance
 
     def getLambda(self):
-        """
-        # FIXME: No se que hace
-        """
         L = numpy.matrix(numpy.identity(self.pRegions))
         for r in range(self.pRegions):
             L[r, r] = 1.0 * self.NRegion[r] / self.N
@@ -961,9 +957,6 @@ class RegionMaker:
         return feasible
 
     def calculateRegionValueThreshold(self):
-        """
-        # FIXME: No se que hace
-        """
         if self.numRegionsType == "Exogenous":
             nr = range(self.pRegions)
         else:
