@@ -1,9 +1,9 @@
 """
-Testing clustering algorithms in Clusterpy -Arisel-
+Testing clustering algorithms in Clusterpy
 ** All the following tests take considerable time to complete **
 """
 
-from unittest import TestCase
+from unittest import TestCase, skip
 from nose.plugins.attrib import attr
 import clusterpy
 from numpy.random import seed as make_static_random
@@ -30,7 +30,6 @@ class TestArisel(TestCase):
         """
         instance = self.map_instance
 
-        make_static_random(10)
         instance.cluster('arisel', ['SAR1'],
                                   into_regions, dissolve = 1,
                                   inits = 20)
@@ -62,3 +61,37 @@ class TestArisel(TestCase):
         final_obj_func = clustering_results['objectiveFunction']
 
         assert initial_obj_func >= final_obj_func
+
+@skip
+class TestMaxP(TestCase):
+    def setUp(self):
+        self.map_instance = clusterpy.importArcData(sample_input_path)
+
+    def tearDown(self):
+        pass
+
+    @attr('slow')
+    def test_maxp_never_breaks_contiguity(self):
+        self.assertTrue(0)
+
+    @attr('slow')
+    def test_maxp_gives_at_least_same_obj_func(self):
+        self.assertTrue(1 < 0)
+
+@skip
+class TestAZPalgorithms(TestCase):
+    """ Tests for AZP, AZPrTabu, AZPSA """
+    def setUp(self):
+        self.map_instance = clusterpy.importArcData(sample_input_path)
+
+    def tearDown(self):
+        pass
+
+    @attr('slow')
+    def test_azp_never_breaks_contiguity(self):
+        self.assertTrue(0)
+
+    @attr('slow')
+    def test_azp_gives_at_least_same_obj_func(self):
+        self.assertTrue(1 < 0)
+
