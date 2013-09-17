@@ -1877,11 +1877,12 @@ class AreaCl:
         y1 = []
         index = 0
         if len(indexData) == 0:
-            indexData = range(len(self.data))
-        for index in indexData:
-            y0 += [self.data[index]]
-            y1 += [otherArea.data[index]]
-#        data = numpy.concatenate(([y0], [y1]))
+            y0 = self.data
+            y1 = otherArea.data
+        else:
+            for index in indexData:
+                y0 += [self.data[index]]
+                y1 += [otherArea.data[index]]
         data = [y0] + [y1]
         areaDistance = distanceFunctions.distMethods[distanceType](data)
         try:
