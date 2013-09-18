@@ -9,8 +9,8 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import numpy
-
+from numpy import argsort as npargsort, double as npdouble
+from numpy import matrix as npmatrix, random as nprandom
 from areacl import AreaCl
 
 def indexMultiple(x,value):
@@ -25,7 +25,7 @@ def calculateGetisG(keyList, dataMean, dataStd, dataDictionary, dataLength):
     """
     sum = 0
     for i in keyList:
-        sum = sum + numpy.double((dataDictionary[i]))
+        sum = sum + npdouble((dataDictionary[i]))
     neighborNumber = len(keyList)
     numerator = sum - dataMean * neighborNumber
     denominator = dataStd * ((float(dataLength * neighborNumber - (neighborNumber ** 2)) / (dataLength - 1)) ** 0.5)
@@ -112,9 +112,9 @@ def calculateCentroid(areaList):
     for area in areaList:
         pg += area.data[0]
         pk = pk + [area.data[0]]
-    pkPg = numpy.matrix(pk).T / pg
+    pkPg = npmatrix(pk).T / pg
     data = [0.0] * len(area.data)
-    var = numpy.matrix(areaList[0].var) * 0.0
+    var = npmatrix(areaList[0].var) * 0.0
     j = 0
     for area in areaList:
         var += area.var * pow(pkPg[j, 0], 2)
@@ -168,7 +168,7 @@ def sortedKeys(d):
     Return keys of the dictionary d sorted based on their values.
     """
     values = d.values()
-    sortedIndices = numpy.argsort(values)
+    sortedIndices = npargsort(values)
     sortedKeys = [d.keys()[i] for i in sortedIndices]
     minVal = min(values)
     countMin = values.count(minVal)
@@ -176,7 +176,7 @@ def sortedKeys(d):
         minIndices = sortedKeys[0: countMin]
         nInd = len(minIndices)
         idx = range(nInd)
-        numpy.random.shuffle(idx)
+        nprandom.shuffle(idx)
         permMins = idx
         c = 0
         for i in range(nInd):

@@ -9,7 +9,7 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import numpy
+from numpy import array as nparray
 
 class somManager():
     """SOM Manager object
@@ -121,9 +121,9 @@ class somManager():
         """
         inputY = self.data[areaId]
         for i in self.outputContiguity[bmu] + [bmu]:
-            dist = numpy.array(inputY) - numpy.array(self.actualData[i])
+            dist = nparray(inputY) - nparray(self.actualData[i])
             alph = self.__alpha(iter)
-            self.actualData[i] = list(numpy.array(self.actualData[i]) \
+            self.actualData[i] = list(nparray(self.actualData[i]) \
                                      + alph * dist)
 
     def addSolution(self, iter):

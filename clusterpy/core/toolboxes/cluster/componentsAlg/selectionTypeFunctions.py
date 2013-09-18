@@ -9,8 +9,8 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import numpy
-import random
+from numpy import random as nprandom
+from random import randint
 
 def minimumSelection(RegionMaker):
     """
@@ -45,7 +45,7 @@ def minimumSelection(RegionMaker):
                 indicesMin.append(it)
                 nInd += 1
         
-        idx = random.randint(0, nInd - 1)
+        idx = randint(0, nInd - 1)
         minIndex = indicesMin[idx]
         aid = keys[minIndex][0]
         rid = keys[minIndex][1]
@@ -62,7 +62,7 @@ def fullRandom(RegionMaker):
     keys = RegionMaker.candidateInfo.keys() 
     values = [ RegionMaker.candidateInfo[i] for i in keys ]
     if len(values) > 0:
-        randomIndex = numpy.random.randint(0, len(values))
+        randomIndex = nprandom.randint(0, len(values))
         aid,rid = keys[randomIndex]
         [RegionMaker.candidateInfo.pop(key) for key in keys if key[0] == aid]
         RegionMaker.assignArea(aid, rid)
@@ -79,3 +79,4 @@ def indexMultiple(x,value):
 selectionTypeDispatcher = {}
 selectionTypeDispatcher["Minimum"] = minimumSelection
 selectionTypeDispatcher["FullRandom"] = fullRandom
+

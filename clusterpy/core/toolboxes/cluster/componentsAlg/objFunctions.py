@@ -10,8 +10,7 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import numpy
-import distanceFunctions
+from distanceFunctions import distMethods
 
 def getObjectiveFunctionSumSquares(RegionMaker, region2AreaDict, indexData=[]):
     """
@@ -30,7 +29,7 @@ def getObjectiveFunctionSumSquares(RegionMaker, region2AreaDict, indexData=[]):
             for index in indexData:
                 areaData += [area.data[index]]
             data = [areaData] + [dataAvg]
-            areaDistance = distanceFunctions.distMethods[RegionMaker.distanceType](data)
+            areaDistance = distMethods[RegionMaker.distanceType](data)
             dist = areaDistance[0][0]
             objDict[region] += dist
     obj = sum(objDict.values())
@@ -73,7 +72,7 @@ def getObjectiveFunctionSumSquaresFast(RegionMaker, region2AreaDict, modifiedReg
                         areaData.append(areaDataList[index])
                     areaData = [areaData] + [dataAvg]
                     # Taking the first element from the dataDistance
-                    dist = distanceFunctions.distMethods[RegionMaker.distanceType](areaData)[0][0]
+                    dist = distMethods[RegionMaker.distanceType](areaData)[0][0]
                     valRegion += dist
                     
                 cachedObj[key] = valRegion
@@ -107,7 +106,7 @@ def makeObjDict(RegionMaker, indexData=[]):
             for index in indexData:
                 areaData += [area.data[index]]
             data = [areaData] + [dataAvg]
-            areaDistance = distanceFunctions.distMethods[RegionMaker.distanceType](data)
+            areaDistance = distMethods[RegionMaker.distanceType](data)
             dist = areaDistance[0][0]
             objDict[region] += dist
     return objDict
