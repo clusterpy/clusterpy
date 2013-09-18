@@ -928,9 +928,6 @@ class RegionMaker:
         a2r = set(region2AreaDict[regionID])
         aIDset = set([areaID])
         areas2Eval.remove(areaID)
-        key = list(areas2Eval)
-        key.sort()
-        key = tuple(key)
         seedArea = areas2Eval[0]
         newRegion = (set([seedArea]) | set(self.areas[seedArea].neighs)) & set(areas2Eval)
         areas2Eval.remove(seedArea)
@@ -1777,18 +1774,20 @@ def recode(X):
     Tranform a list with regions begining in x to a lis begining in 0.
     """
     XP = X + []
-    assigned = []
+    i = 0
+    lenX = len(X)
     r = 0
-    for i in range(len(X)):
-        if (i not in assigned):
-            XP[i] = r
-            for j in range(len(X) - i - 1):
-                k = i + j + 1
-                if (k not in assigned):
-                    if X[k] == X[i]:
-                        XP[k] = r
-                        assigned = assigned + [k]
-            r = r + 1
+
+    assigned = {}
+
+    for i in xrange(lenX):
+        if X[i] not in assigned:
+            assigned[X[i]] = r
+            r += 1
+
+    for i in xrange(lenX):
+        XP[i] = assigned[XP[i]]
+
     return XP
 
 def sortedKeys(d):
@@ -1874,14 +1873,15 @@ class AreaCl:
         """
         y0 = []
         y1 = []
-        index = 0
-        if len(indexData) == 0:
-            y0 = self.data
-            y1 = otherArea.data
-        else:
+
+        if indexData:
             for index in indexData:
                 y0 += [self.data[index]]
                 y1 += [otherArea.data[index]]
+        else:
+            y0 = self.data
+            y1 = otherArea.data
+
         data = [y0] + [y1]
         areaDistance = distanceFunctions.distMethods[distanceType](data)
         try:
