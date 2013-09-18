@@ -546,8 +546,7 @@ class RegionMaker:
         Remove a region from candidates
         """
         for i in self.candidateInfo.keys():
-            a, r = i
-            if r in self.feasibleRegions:
+            if i in self.feasibleRegions:
                 self.candidateInfo.pop(i)
 
     def returnRegions(self):
