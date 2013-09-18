@@ -9,10 +9,12 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import copy
-import numpy
-import objFunctions
-import selectionTypeFunctions
+from copy import deepcopy
+from numpy import exp as npexp, identity as npidentity, matrix as npmatrix
+from numpy import ones as npones, power as nppower, random as nprandom
+from numpy import sort as npsort, zeros as npzeros
+from objFunctions import makeObjDict, objectiveFunctionTypeDispatcher
+from selectionTypeFunctions import selectionTypeDispatcher
 
 from areacl import AreaCl
 from helperfunctions import sortedKeys
@@ -85,7 +87,7 @@ class RegionMaker:
         @keyword indexDataOf:
         """
         self.am = am
-        self.areas = copy.deepcopy(am.areas)
+        self.areas = deepcopy(am.areas)
         self.distanceType = distanceType
         self.distanceStat = distanceStat
         self.weightsDistanceStat = weightsDistanceStat
@@ -105,8 +107,8 @@ class RegionMaker:
         self.externalNeighs = set([])
         self.alpha = alpha
         self.numRegionsType = numRegionsType
-        self.objectiveFunctionTypeDispatcher = objFunctions.objectiveFunctionTypeDispatcher
-        self.selectionTypeDispatcher = selectionTypeFunctions.selectionTypeDispatcher
+        self.objectiveFunctionTypeDispatcher = objectiveFunctionTypeDispatcher
+        self.selectionTypeDispatcher = selectionTypeDispatcher
         self.neighSolutions = {(0,0): 9999}
         self.regionMoves = set([])
         self.distances = {}
@@ -184,7 +186,7 @@ class RegionMaker:
                     c += 1
             self.setSeeds(seeds)
             while len(self.unassignedAreas) != 0:
-                numpy.random.shuffle(self.unassignedAreas)
+                nprandom.shuffle(self.unassignedAreas)
                 vals = []
                 for index in self.unassignedAreas:
                     vals += [self.areas[index].thresholdVar]
@@ -225,7 +227,7 @@ class RegionMaker:
 
                 #  select seed
 
-                numpy.random.shuffle(self.unassignedAreas)
+                nprandom.shuffle(self.unassignedAreas)
                 seed = self.unassignedAreas[0]
                 self.setSeeds([seed],c)
 
@@ -274,15 +276,15 @@ class RegionMaker:
         cachedDistances = {}
         y = self.am.y
         n = len(y)
-        distances = numpy.ones(n)
+        distances = npones(n)
         total = sum(distances)
         probabilities = map(lambda x: x / float(total), distances)
         seeds = []
         localDistanceType = self.distanceType
         localreturnDistance2Area = AreaCl.returnDistance2Area
-        numpy.random.seed(getpid())
+        nprandom.seed(getpid())
         for k in range(self.pRegions):
-            random = numpy.random.uniform(0, 1)
+            random = nprandom.uniform(0, 1)
             find = False
             acum = 0
             cont = 0
@@ -345,7 +347,7 @@ class RegionMaker:
         Return regions created
         """
         areasId = self.area2Region.keys()
-        areasId = numpy.sort(areasId).tolist()
+        areasId = npsort(areasId).tolist()
         return [self.area2Region[area] for area in areasId]
 
     def resetNow(self):
@@ -369,7 +371,7 @@ class RegionMaker:
         if self.numRegionsType == "Exogenous" and len(seeds) <= self.pRegions:
             idx = range(self.n)
             didx = list((set(idx) - set(seeds)) - self.am.noNeighs)
-            numpy.random.shuffle(didx)
+            nprandom.shuffle(didx)
             self.seeds = seeds + didx[0:(self.pRegions - len(seeds))]
         else:
             self.seeds = seeds
@@ -590,7 +592,7 @@ class RegionMaker:
         indices = indexMultiple(candidates, 1)
         nCandidates = len(indices)
         idx = range(nCandidates)
-        numpy.random.shuffle(idx)
+        nprandom.shuffle(idx)
         random = idx[0]
         index4Grasp = indices[random]
         return index4Grasp
@@ -648,7 +650,7 @@ class RegionMaker:
             return distance
 
     def getLambda(self):
-        L = numpy.matrix(numpy.identity(self.pRegions))
+        L = npmatrix(npidentity(self.pRegions))
         for r in range(self.pRegions):
             L[r, r] = 1.0 * self.NRegion[r] / self.N
         return L
@@ -657,7 +659,7 @@ class RegionMaker:
         """
         Return matrix of parameters of all regions
         """
-        B = numpy.matrix(numpy.zeros(len(self.data[0]) * self.pRegions)).T
+        B = npmatrix(npzeros(len(self.data[0]) * self.pRegions)).T
         index = 0
         for r in range(self.pRegions):
             for i in range(len(self.data[0])):
@@ -669,19 +671,19 @@ class RegionMaker:
         """
         Return matrix of the average variance-covariance of all regions
         """
-        Y = numpy.matrix(numpy.identity(len(self.data[0])))
+        Y = npmatrix(npidentity(len(self.data[0])))
         centroids = {}
         for r in range(self.pRegions):
             centroids[r] = calculateCentroid([self.areas[aID] for aID in self.region2Area[r]])
         for r in range(self.pRegions):
-            Y += centroids[r].var * numpy.power(self.NRegion[r] / self.N, 2)
+            Y += centroids[r].var * nppower(self.NRegion[r] / self.N, 2)
         return Y
 
     def getH(self):
         """
         Return composite matrix
         """
-        E = numpy.matrix(numpy.ones((1, self.pRegions, self.pRegions)))
+        E = npmatrix(npones((1, self.pRegions, self.pRegions)))
         L = self.getLambda()
         H = L - L * E * L
         return H
@@ -757,9 +759,9 @@ class RegionMaker:
         """
         Select solutions that improve the current objective function.
         """
-        intraCopy = copy.deepcopy(self.intraBorderingAreas)
-        region2AreaCopy = copy.deepcopy(self.region2Area)
-        area2RegionCopy = copy.deepcopy(self.area2Region)
+        intraCopy = deepcopy(self.intraBorderingAreas)
+        region2AreaCopy = deepcopy(self.region2Area)
+        area2RegionCopy = deepcopy(self.area2Region)
         self.neighSolutions = {}
         for area in intraCopy.keys():
             regionIn = self.area2Region[area]
@@ -782,9 +784,9 @@ class RegionMaker:
         """
         Select neighboring solutions.
         """
-        intraCopy = copy.deepcopy(self.intraBorderingAreas)
-        region2AreaCopy = copy.deepcopy(self.region2Area)
-        area2RegionCopy = copy.deepcopy(self.area2Region)
+        intraCopy = deepcopy(self.intraBorderingAreas)
+        region2AreaCopy = deepcopy(self.region2Area)
+        area2RegionCopy = deepcopy(self.area2Region)
         self.neighSolutions = {}
         for area in intraCopy.keys():
             regionIn = self.area2Region[area]
@@ -853,7 +855,7 @@ class RegionMaker:
             else:
                 if typeGreedy == "exact":
                     sorted = sortedKeys(self.neighSolutions)
-                    move = sorted[numpy.random.randint(0, len(sorted))]
+                    move = sorted[nprandom.randint(0, len(sorted))]
                     area, region = move
                 else:
                     values = self.neighSolutions.values()
@@ -862,7 +864,7 @@ class RegionMaker:
                     indicesMin = indexMultiple(values, minVal)
                     nInd = len(indicesMin)
                     idx = range(nInd)
-                    numpy.random.shuffle(idx)
+                    nprandom.shuffle(idx)
                     minIndex = indicesMin[idx[0]]
                     area,region = self.neighSolutions.keys()[minIndex]
                 self.moveArea(area, region)
@@ -884,8 +886,8 @@ class RegionMaker:
         aspireOBJ = self.objInfo
         currentOBJ = self.objInfo
         aspireRegions = self.returnRegions()
-        region2AreaAspire = copy.deepcopy(self.region2Area)
-        area2RegionAspire = copy.deepcopy(self.area2Region)
+        region2AreaAspire = deepcopy(self.region2Area)
+        area2RegionAspire = deepcopy(self.area2Region)
         currentRegions = aspireRegions
         bestAdmisable = 9999999.0
         tabuList = [0]*tabuLength
@@ -900,7 +902,7 @@ class RegionMaker:
             #  print "regions: ",self.returnRegions(), self.objInfo
 
             if typeTabu == "exact":
-                self.objDict = objFunctions.makeObjDict(self)
+                self.objDict = makeObjDict(self)
                 self.allCandidates()
 
                 #print "soluciones vecinas",self.neighSolutions
@@ -924,10 +926,10 @@ class RegionMaker:
                         candidate = 1
                     else:
                         candidate = 0
-                        region2AreaCopy = copy.deepcopy(self.region2Area)
-                        area2RegionCopy = copy.deepcopy(self.area2Region)
+                        region2AreaCopy = deepcopy(self.region2Area)
+                        area2RegionCopy = deepcopy(self.area2Region)
                         while (candidate == 0 and len(moves) > 0):
-                            move = moves[numpy.random.randint(0, len(moves))]
+                            move = moves[nprandom.randint(0, len(moves))]
                             moves.remove(move)
                             area, region = move
                             run += 1
@@ -965,8 +967,8 @@ class RegionMaker:
                                         aspireOBJ = obj4Move
                                         currentOBJ = obj4Move
                                         aspireRegions = self.returnRegions()
-                                        region2AreaAspire = copy.deepcopy(self.region2Area)
-                                        area2RegionAspire = copy.deepcopy(self.area2Region)
+                                        region2AreaAspire = deepcopy(self.region2Area)
+                                        area2RegionAspire = deepcopy(self.area2Region)
                                         currentRegions = aspireRegions
                                         bestAdmisable = obj4Move
                                         cBreak.append(c)
@@ -995,8 +997,8 @@ class RegionMaker:
                                         aspireOBJ = obj4Move
                                         currentOBJ = obj4Move
                                         aspireRegions = self.returnRegions()
-                                        region2AreaAspire = copy.deepcopy(self.region2Area)
-                                        area2RegionAspire = copy.deepcopy(self.area2Region)
+                                        region2AreaAspire = deepcopy(self.region2Area)
+                                        area2RegionAspire = deepcopy(self.area2Region)
                                         currentRegions = aspireRegions
                                         bestAdmisable = obj4Move
                                         cBreak.append(c)
@@ -1023,8 +1025,8 @@ class RegionMaker:
                         c += convTabu
         self.objInfo = aspireOBJ
         self.regions = aspireRegions
-        self.region2Area = copy.deepcopy(region2AreaAspire)
-        self.area2Region = copy.deepcopy(area2RegionAspire)
+        self.region2Area = deepcopy(region2AreaAspire)
+        self.area2Region = deepcopy(area2RegionAspire)
 
         #  print "FINAL SOLUTION IN TABU",self.objInfo,self.regions
 
@@ -1042,7 +1044,7 @@ class RegionMaker:
                 # step 3
 
                 if len(regions) > 1:
-                    randomRegion = numpy.random.randint(0, len(regions))
+                    randomRegion = nprandom.randint(0, len(regions))
                 else:
                     randomRegion = 0
                 region = regions[randomRegion]
@@ -1056,7 +1058,7 @@ class RegionMaker:
 
                     # step 5
 
-                    randomArea = numpy.random.randint(0, len(borderingAreas))
+                    randomArea = nprandom.randint(0, len(borderingAreas))
                     area = borderingAreas[randomArea]
                     borderingAreas.remove(area)
                     posibleMove = list(self.returnIntraBorderingAreas()[area])
@@ -1085,8 +1087,8 @@ class RegionMaker:
         currentOBJ = self.objInfo
         bestRegions = self.returnRegions()
         currentRegions = self.returnRegions()
-        region2AreaBest = copy.deepcopy(self.region2Area)
-        area2RegionBest = copy.deepcopy(self.area2Region)
+        region2AreaBest = deepcopy(self.region2Area)
+        area2RegionBest = deepcopy(self.area2Region)
 
         improve = 1
         while improve == 1:
@@ -1095,7 +1097,7 @@ class RegionMaker:
 
                 #  step 3
                 if len(regions) > 1:
-                    randomRegion = numpy.random.randint(0, len(regions) - 1)
+                    randomRegion = nprandom.randint(0, len(regions) - 1)
                 else:
                     randomRegion = 0
                 region = regions[randomRegion]
@@ -1108,7 +1110,7 @@ class RegionMaker:
                 while len(borderingAreas) > 0:
                     # step 5
 
-                    randomArea = numpy.random.randint(0, len(borderingAreas))
+                    randomArea = nprandom.randint(0, len(borderingAreas))
                     area = borderingAreas[randomArea]
                     borderingAreas.remove(area)
                     posibleMove = list(self.returnIntraBorderingAreas()[area])
@@ -1132,8 +1134,8 @@ class RegionMaker:
                                 currentOBJ = obj
                                 bestRegions = self.returnRegions()
                                 currentRegions = self.returnRegions()
-                                region2AreaBest = copy.deepcopy(self.region2Area)
-                                area2RegionBest = copy.deepcopy(self.area2Region)
+                                region2AreaBest = deepcopy(self.region2Area)
+                                area2RegionBest = deepcopy(self.area2Region)
 
                                 #  print "--- Local improvement (area, region)", area, move
                                 #  print "--- New Objective Function value: ", obj
@@ -1142,9 +1144,9 @@ class RegionMaker:
                                 borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.returnRegion2Area(region)))
                                 break
                             else:
-                                random = numpy.random.rand(1)[0]
+                                random = nprandom.rand(1)[0]
                                 totalMoves += 1
-                                if (numpy.exp(-(obj - currentOBJ) / (currentOBJ * temperature))) > random:
+                                if (npexp(-(obj - currentOBJ) / (currentOBJ * temperature))) > random:
                                     acceptedMoves += 1
                                     self.moveArea(area, move)
                                     self.objInfo = obj
@@ -1158,8 +1160,8 @@ class RegionMaker:
                                     borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.returnRegion2Area(region)))
                                     break
         self.objInfo = bestOBJ
-        self.region2Area = copy.deepcopy(region2AreaBest)
-        self.area2Region = copy.deepcopy(area2RegionBest)
+        self.region2Area = deepcopy(region2AreaBest)
+        self.area2Region = deepcopy(area2RegionBest)
 
     def AZPTabuMove(self, tabuLength=5, convTabu=5):
         """
@@ -1168,10 +1170,10 @@ class RegionMaker:
         aspireOBJ = self.objInfo
         currentOBJ = self.objInfo
         aspireRegions = self.returnRegions()
-        region2AreaAspire = copy.deepcopy(self.region2Area)
-        area2RegionAspire = copy.deepcopy(self.area2Region)
-        currentRegions = copy.deepcopy(aspireRegions)
-        tabuList = numpy.zeros(tabuLength)
+        region2AreaAspire = deepcopy(self.region2Area)
+        area2RegionAspire = deepcopy(self.area2Region)
+        currentRegions = deepcopy(aspireRegions)
+        tabuList = npzeros(tabuLength)
         tabuList = tabuList.tolist()
         cBreak = []
         c = 1
@@ -1180,13 +1182,13 @@ class RegionMaker:
         epsilon = 1e-10
 
         while c <= convTabu:
-            self.objDict = objFunctions.makeObjDict(self)
+            self.objDict = makeObjDict(self)
             self.allCandidates()
             if len(self.neighSolutions) == 0:
                 c += convTabu
             else:
                 minFound = 0
-                neighSolutionsCopy = copy.deepcopy(self.neighSolutions)
+                neighSolutionsCopy = deepcopy(self.neighSolutions)
                 c += 1
                 neighNoTabuKeys = list(set(neighSolutionsCopy.keys()) - set(tabuList))
                 neighNoTabuDict = dict((key, neighSolutionsCopy[key]) for key in neighNoTabuKeys)
@@ -1217,8 +1219,8 @@ class RegionMaker:
                     if  (aspireOBJ - obj4Move) > epsilon:
                         aspireOBJ = obj4Move
                         aspireRegions = self.returnRegions()
-                        region2AreaAspire = copy.deepcopy(self.region2Area)
-                        area2RegionAspire = copy.deepcopy(self.area2Region)
+                        region2AreaAspire = deepcopy(self.region2Area)
+                        area2RegionAspire = deepcopy(self.area2Region)
                         c = 1
                     currentOBJ = obj4Move
                     currentRegions = self.returnRegions()
@@ -1234,8 +1236,8 @@ class RegionMaker:
                     currentRegions = self.returnRegions()
         self.objInfo = aspireOBJ
         self.regions = aspireRegions
-        self.region2Area = copy.deepcopy(region2AreaAspire)
-        self.area2Region = copy.deepcopy(area2RegionAspire)
+        self.region2Area = deepcopy(region2AreaAspire)
+        self.area2Region = deepcopy(area2RegionAspire)
         self.resList = resList
 
     def reactiveTabuMove(self, convTabu=99):
@@ -1247,7 +1249,7 @@ class RegionMaker:
         #  step 2
 
         tabuLength = 1
-        tabuList = numpy.zeros(tabuLength)
+        tabuList = npzeros(tabuLength)
         tabuList = tabuList.tolist()
         rAvg = 1
         K1 = 3
@@ -1258,20 +1260,20 @@ class RegionMaker:
         epsilon = 1e-10
         aspireOBJ = self.objInfo
         aspireRegions = self.returnRegions()
-        region2AreaAspire = copy.deepcopy(self.region2Area)
-        area2RegionAspire = copy.deepcopy(self.area2Region)
+        region2AreaAspire = deepcopy(self.region2Area)
+        area2RegionAspire = deepcopy(self.area2Region)
         c = 1
         while c <= convTabu:
             improved = 0
 
             #  step 3
 
-            self.objDict = objFunctions.makeObjDict(self)
+            self.objDict = makeObjDict(self)
             self.allCandidates()
             if len(self.neighSolutions) == 0:
                 c += convTabu
             else:
-                neighSolutionsCopy = copy.deepcopy(self.neighSolutions)
+                neighSolutionsCopy = deepcopy(self.neighSolutions)
                 neighNoTabuKeys = list(set(neighSolutionsCopy.keys()) - set(tabuList))
                 neighNoTabuDict = dict((key, neighSolutionsCopy[key]) for key in neighNoTabuKeys)
 
@@ -1298,8 +1300,8 @@ class RegionMaker:
                 if  (aspireOBJ - obj4Move) > epsilon:
                     aspireOBJ = obj4Move
                     aspireRegions = self.returnRegions()
-                    region2AreaAspire = copy.deepcopy(self.region2Area)
-                    area2RegionAspire = copy.deepcopy(self.area2Region)
+                    region2AreaAspire = deepcopy(self.region2Area)
+                    area2RegionAspire = deepcopy(self.area2Region)
                     improved = 1
 
                 #  step 6
@@ -1328,10 +1330,10 @@ class RegionMaker:
                         #  step 11a
 
                         visitedSolutions = []
-                        self.objDict = objFunctions.makeObjDict(self)
+                        self.objDict = makeObjDict(self)
                         self.allCandidates()
                         moveIndex = range(len(self.neighSolutions))
-                        numpy.random.suffle(moveIndex)
+                        nprandom.suffle(moveIndex)
                         for move in moveIndex[0:int(1 + 0.5 * rAvg)]:
                             area, region = move
                             obj4Move = self.neighSolutions[move]
@@ -1345,8 +1347,8 @@ class RegionMaker:
                             if  (aspireOBJ-obj4Move) > epsilon:
                                 aspireOBJ = obj4Move
                                 aspireRegions = self.returnRegions()
-                                region2AreaAspire = copy.deepcopy(self.region2Area)
-                                area2RegionAspire = copy.deepcopy(self.area2Region)
+                                region2AreaAspire = deepcopy(self.region2Area)
+                                area2RegionAspire = deepcopy(self.area2Region)
                                 improved = 1
 
                 #  step 8
@@ -1371,8 +1373,8 @@ class RegionMaker:
 
         self.objInfo = aspireOBJ
         self.regions = aspireRegions
-        self.region2Area = copy.deepcopy(region2AreaAspire)
-        self.area2Region = copy.deepcopy(area2RegionAspire)
+        self.region2Area = deepcopy(region2AreaAspire)
+        self.area2Region = deepcopy(area2RegionAspire)
 
     def moveArea(self, areaID, regionID):
         """
