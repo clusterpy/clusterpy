@@ -9,8 +9,8 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import distanceFunctions
-import numpy
+from distanceFunctions import distMethods
+from numpy import sqrt as npsqrt, matrix as npmatrix, identity as npidentity
 
 class AreaCl:
     """
@@ -35,8 +35,8 @@ class AreaCl:
         if variance == "false":
             self.data = data
         else:
-            n = (numpy.sqrt(9 + 8 * (len(data) - 1)) - 3) / 2
-            self.var = numpy.matrix(numpy.identity(n))
+            n = (npsqrt(9 + 8 * (len(data) - 1)) - 3) / 2
+            self.var = npmatrix(npidentity(n))
             index = n + 1
             for i in range(int(n)):
                 for j in range(i + 1):
@@ -61,7 +61,7 @@ class AreaCl:
             y1 = otherArea.data
 
         data = [y0] + [y1]
-        areaDistance = distanceFunctions.distMethods[distanceType](data)
+        areaDistance = distMethods[distanceType](data)
         try:
             dist = areaDistance[0][0]
         except:

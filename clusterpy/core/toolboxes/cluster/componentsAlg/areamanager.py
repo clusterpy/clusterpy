@@ -9,10 +9,8 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import dist2Regions
-import numpy
-
 from areacl import AreaCl
+from dist2Regions import distanceStatDispatcher
 
 class AreaManager:
     """
@@ -42,7 +40,7 @@ class AreaManager:
         self.variance = variance
         self.distanceType = distanceType
         self.createAreas(w, y)
-        self.distanceStatDispatcher = dist2Regions.distanceStatDispatcher
+        self.distanceStatDispatcher = distanceStatDispatcher
 
     def createAreas(self, w, y):
         """
