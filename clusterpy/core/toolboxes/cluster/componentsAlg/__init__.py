@@ -9,8 +9,6 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import numpy
-
 from areamanager import AreaManager
 from helperfunctions import calculateGetisG, quickSort2, neighborSort
 from memory import BasicMemory, ExtendedMemory
