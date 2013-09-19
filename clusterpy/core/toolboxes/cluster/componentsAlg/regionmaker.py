@@ -193,7 +193,7 @@ class RegionMaker:
                 seed = self.unassignedAreas[0]
                 self.setSeeds([seed], c)
                 self.regionValue[c] = self.areas[seed].thresholdVar
-                if  self.regionValue[c] >= self.regionalThreshold:
+                if self.regionValue[c] >= self.regionalThreshold:
                     self.feasibleRegions[c] = [seed]
                     self.removeRegionAsCandidate()
                     c += 1
@@ -943,7 +943,7 @@ class RegionMaker:
                                     candidate = 1
                                 elif self.numRegionsType == "EndogenousThreshold":
                                         self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
-                                        if  self.regionValue[region] >= self.regionalThreshold and self.regionValue[regionIn] >= self.regionalThreshold:
+                                        if self.regionValue[region] >= self.regionalThreshold and self.regionValue[regionIn] >= self.regionalThreshold:
                                             obj4Move = self.recalcObj(region2AreaCopy)
                                             candidate = 1
                                         self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
@@ -956,7 +956,7 @@ class RegionMaker:
 
                                 #  print "move is in tabu list"
 
-                                if  (aspireOBJ-obj4Move) > epsilon:
+                                if (aspireOBJ-obj4Move) > epsilon:
 
                                         #  print "CASE1: improves aspirational: ",aspireOBJ,obj4Move
 
@@ -1004,7 +1004,7 @@ class RegionMaker:
                                         cBreak.append(c)
                                         c = 1
                                         run = end
-                                        resList.append( [obj4Move, aspireOBJ] )
+                                        resList.append([obj4Move, aspireOBJ])
                                 else:
                                         #  print "CASE 4: does not improve aspirational: ",aspireOBJ,obj4Move
 
@@ -1197,7 +1197,7 @@ class RegionMaker:
                     obj4Move = self.neighSolutions[move]
                     moveNoTabu = move
                     obj4MoveNoTabu = obj4Move
-                    if  (currentOBJ - obj4Move) >= epsilon:
+                    if (currentOBJ - obj4Move) >= epsilon:
                         minFound = 1
                     else:
                         neighTabuKeys = list(set(neighSolutionsCopy.keys()) & set(tabuList))
@@ -1207,7 +1207,7 @@ class RegionMaker:
                             obj4Move = self.neighSolutions[move]
                             moveTabu = move
                             obj4MoveTabu = obj4Move
-                            if  (aspireOBJ - obj4Move) > epsilon:
+                            if (aspireOBJ - obj4Move) > epsilon:
                                 minFound = 1
                 if minFound == 1:
                     area, region = move
@@ -1216,7 +1216,7 @@ class RegionMaker:
                     tabuList = self.updateTabuList((area, oldRegion), tabuList, tabuLength)
                     self.moveArea(area, region)
                     self.objInfo = obj4Move
-                    if  (aspireOBJ - obj4Move) > epsilon:
+                    if (aspireOBJ - obj4Move) > epsilon:
                         aspireOBJ = obj4Move
                         aspireRegions = self.returnRegions()
                         region2AreaAspire = deepcopy(self.region2Area)
@@ -1344,7 +1344,7 @@ class RegionMaker:
 
                             #  update aspirational
 
-                            if  (aspireOBJ-obj4Move) > epsilon:
+                            if (aspireOBJ-obj4Move) > epsilon:
                                 aspireOBJ = obj4Move
                                 aspireRegions = self.returnRegions()
                                 region2AreaAspire = deepcopy(self.region2Area)
@@ -1430,4 +1430,4 @@ class RegionMaker:
         """
         Return the seeds of the solution
         """
-        return self.seeds;
+        return self.seeds
