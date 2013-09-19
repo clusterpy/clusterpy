@@ -9,7 +9,7 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-from distanceFunctions import distMethods
+from clusterpy.core.toolboxes.cluster.componentsAlg.distanceFunctions import distMethods
 from numpy import sqrt as npsqrt, matrix as npmatrix, identity as npidentity
 
 class AreaCl:

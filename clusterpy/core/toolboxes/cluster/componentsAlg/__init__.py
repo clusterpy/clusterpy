@@ -9,9 +9,12 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-from areamanager import AreaManager
-from helperfunctions import calculateGetisG, quickSort2, neighborSort
-from memory import BasicMemory, ExtendedMemory
-from regionmaker import RegionMaker
-from sommanager import geoSomManager, somManager
-
+from clusterpy.core.toolboxes.cluster.componentsAlg.areamanager import AreaManager
+from clusterpy.core.toolboxes.cluster.componentsAlg.helperfunctions import calculateGetisG
+from clusterpy.core.toolboxes.cluster.componentsAlg.helperfunctions import quickSort2
+from clusterpy.core.toolboxes.cluster.componentsAlg.helperfunctions import neighborSort
+from clusterpy.core.toolboxes.cluster.componentsAlg.memory import BasicMemory
+from clusterpy.core.toolboxes.cluster.componentsAlg.memory import ExtendedMemory
+from clusterpy.core.toolboxes.cluster.componentsAlg.regionmaker import RegionMaker
+from clusterpy.core.toolboxes.cluster.componentsAlg.sommanager import geoSomManager
+from clusterpy.core.toolboxes.cluster.componentsAlg.sommanager import somManager
