@@ -14,12 +14,7 @@ from numpy import array as nparray
 class somManager():
     """SOM Manager object
     """
-    def __init__(self,
-                 data,
-                 iters,
-                 outputLayer,
-                 alphaType,
-                 initialDistribution,
+    def __init__(self, data, iters, outputLayer, alphaType, initialDistribution,
                  BMUContiguity):
         """This class control all the SOM neural network structure.
 
@@ -123,8 +118,7 @@ class somManager():
         for i in self.outputContiguity[bmu] + [bmu]:
             dist = nparray(inputY) - nparray(self.actualData[i])
             alph = self.__alpha(iter)
-            self.actualData[i] = list(nparray(self.actualData[i]) \
-                                     + alph * dist)
+            self.actualData[i] = list(nparray(self.actualData[i]) + alph * dist)
 
     def addSolution(self, iter):
         """
@@ -156,14 +150,8 @@ class somManager():
 class geoSomManager(somManager):
     """Geo-SOM Manager object
     """
-    def __init__(self,data,
-                 iters,
-                 outputLayer,
-                 alphaType,
-                 initialDistribution,
-                 BMUContiguity,
-                 iCentroids,
-                 oCentroids):
+    def __init__(self, data, iters, outputLayer, alphaType, initialDistribution,
+                 BMUContiguity, iCentroids, oCentroids):
         """
         This class control all the geoSOM neural network structure.
         Aditionally it's the repository of the output layer and the
@@ -193,15 +181,11 @@ class geoSomManager(somManager):
         @type oCentroids: dictionary
         @param oCentroids: Centroid coordinates for the output Layer areas.
         """
-        somManager.__init__(self,data,
-                 iters,
-                 outputLayer,
-                 alphaType,
-                 initialDistribution,
-                 BMUContiguity)
-        self.iCentroids=iCentroids
-        self.oCentroids=oCentroids
-        self.geoWinner, self.feasibleBMU=self.defGeoWinnerAttributes()
+        somManager.__init__(self, data, iters, outputLayer, alphaType,
+                 initialDistribution, BMUContiguity)
+        self.iCentroids = iCentroids
+        self.oCentroids = oCentroids
+        self.geoWinner, self.feasibleBMU = self.defGeoWinnerAttributes()
 
     def defGeoWinnerAttributes(self):
         """
@@ -239,4 +223,3 @@ class geoSomManager(somManager):
                 min = dist
                 bmu = i
         return bmu
-

@@ -1,6 +1,6 @@
 # encoding: latin2
 """
-Distance functions 
+Distance functions
 """
 __author__ = "Juan C. Duque"
 __credits__ = "Copyright (c) 2009-11 Juan C. Duque"
@@ -17,7 +17,7 @@ def square_double(x):
         ans += i*i
     return ans
 
-def distanceA2AEuclideanSquared(x, std=[],w=[]):
+def distanceA2AEuclideanSquared(x, std=[], w=[]):
     """
     This function calcule the Euclidean Squared distance between
     two or more variables.
@@ -60,7 +60,7 @@ def getHammingDistance(X, Y):
     Y: Solution 2
     Outputs:
     distance: Similarity between the solution (Range [0 - 1])
-    Examples:    
+    Examples:
     >>> X = [3, 1, 1, 0, 3, 0, 1, 0, 2, 0, 0, 3, 2, 2, 3, 3]
     >>> Y = [0, 0, 0, 3, 0, 3, 3, 3, 2, 3, 3, 1, 2, 2, 1, 1]
     >>> getHammingDistance(X, Y)
@@ -125,13 +125,13 @@ def getHammingDistance(X, Y):
 
 def distanceA2AHausdorff(x, y):
     """
-    This function calcule the Hausdorff distance between two 
+    This function calcule the Hausdorff distance between two
     or more variables.
     """
     distances = []
     for i in range(len(x)):
         distances = distances + [max(abs(y[i][1] - x[i][0]), abs(x[i][1] - y[i][0]))]
-    distance = max(distances) 
+    distance = max(distances)
     return distance
 
 distMethods = {}
