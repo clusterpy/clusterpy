@@ -712,10 +712,13 @@ class RegionMaker:
             obj = self.getObjective(region2AreaDict)
         return obj
 
-    def checkFeasibility(self, regionID, areaID, region2AreaDict):
+    def checkFeasibility(self, regionID, areaID,
+                         region2AreaDict = None):
         """
         Check feasibility from a change region (remove an area from a region)
         """
+        if not region2AreaDict:
+            region2AreaDict = self.region2Area
         areas2Eval = list(region2AreaDict[regionID])
         a2r = set(region2AreaDict[regionID])
         aIDset = set([areaID])
@@ -853,13 +856,12 @@ class RegionMaker:
             if len(self.neighSolutions.keys()) == 0:
                 flag = 0
             else:
+                sortedk = sortedKeys(self.neighSolutions)
                 if typeGreedy == "exact":
-                    sorted = sortedKeys(self.neighSolutions)
-                    move = sorted[nprandom.randint(0, len(sorted))]
+                    move = sortedk[nprandom.randint(0, len(sortedk))]
                     area, region = move
                 else:
                     values = self.neighSolutions.values()
-                    sorted = sortedKeys(self.neighSolutions)
                     minVal = min(self.neighSolutions.values())
                     indicesMin = indexMultiple(values, minVal)
                     nInd = len(indicesMin)
@@ -868,8 +870,6 @@ class RegionMaker:
                     minIndex = indicesMin[idx[0]]
                     area,region = self.neighSolutions.keys()[minIndex]
                 self.moveArea(area, region)
-
-                #  self.objInfo = minVal
 
         self.regions = self.returnRegions()
 
