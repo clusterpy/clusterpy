@@ -883,12 +883,14 @@ class RegionMaker:
         """
         Conduct a solution to the best posible with tabu search
         """
+        is_exact_type = (typeTabu == "exact")
+        is_rand_type = (typeTabu == "random")
         aspireOBJ = self.objInfo
         currentOBJ = self.objInfo
         aspireRegions = self.returnRegions()
+        currentRegions = aspireRegions
         region2AreaAspire = deepcopy(self.region2Area)
         area2RegionAspire = deepcopy(self.area2Region)
-        currentRegions = aspireRegions
         bestAdmisable = 9999999.0
         tabuList = [0]*tabuLength
         cBreak = []
@@ -898,30 +900,27 @@ class RegionMaker:
         epsilon = 1e-10
 
         while c <= convTabu:
-
-            #  print "regions: ",self.returnRegions(), self.objInfo
-
-            if typeTabu == "exact":
+            if is_exact_type:
                 self.objDict = makeObjDict(self)
                 self.allCandidates()
-
-                #print "soluciones vecinas",self.neighSolutions
-
             else:
                 moves = self.allMoves()
-            if (typeTabu == "exact" and len(self.neighSolutions) == 0) or (typeTabu == "random" and len(moves) == 0):
+
+            if ((is_exact_type and len(self.neighSolutions) == 0) or
+                (is_rand_type and len(moves) == 0)):
                 c += convTabu
             else:
-                if typeTabu == "exact":
-                    sorted = sortedKeys(self.neighSolutions)
-                    end = len(sorted)
+                if is_exact_type:
+                    sortedk = sortedKeys(self.neighSolutions)
+                    end = len(sortedk)
                 else:
                     end = len(moves)
                 run = 0
+
                 while run < end:
-                    if typeTabu == "exact":
-                        move = sorted[run]
-                        area,region = move
+                    if is_exact_type:
+                        move = sortedk[run]
+                        area, region = move
                         obj4Move = self.neighSolutions[move]
                         candidate = 1
                     else:
@@ -934,102 +933,79 @@ class RegionMaker:
                             area, region = move
                             run += 1
                             regionIn = self.area2Region[area]
-                            f = self.checkFeasibility(regionIn, area, self.region2Area)
-                            if f == 1:
+                            _feasible = self.checkFeasibility(regionIn, area)
+                            if _feasible == 1:
+                                self.swapArea(area, region, region2AreaCopy,
+                                              area2RegionCopy)
+
                                 if self.numRegionsType == "Exogenous":
-                                    self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
                                     obj4Move = self.recalcObj(region2AreaCopy)
-                                    self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
                                     candidate = 1
-                                elif self.numRegionsType == "EndogenousThreshold":
-                                        self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
-                                        if self.regionValue[region] >= self.regionalThreshold and self.regionValue[regionIn] >= self.regionalThreshold:
-                                            obj4Move = self.recalcObj(region2AreaCopy)
-                                            candidate = 1
-                                        self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
+                                elif (self.numRegionsType == "EndogenousThreshold" and
+                                      self.regionValue[region] >= self.regionalThreshold and
+                                      self.regionValue[regionIn] >= self.regionalThreshold):
+                                    obj4Move = self.recalcObj(region2AreaCopy)
+                                    candidate = 1
+
+                                self.swapArea(area, regionIn, region2AreaCopy,
+                                              area2RegionCopy)
+
                     tabuCount = 0
-                    if candidate == 1:
-
-                        #  print "--- tabu List:", tabuList
-
-                        if move in tabuList:
-
-                                #  print "move is in tabu list"
-
-                                if (aspireOBJ-obj4Move) > epsilon:
-
-                                        #  print "CASE1: improves aspirational: ",aspireOBJ,obj4Move
-
-                                        oldRegion = self.area2Region[area]
-                                        tabuList = self.updateTabuList((area, oldRegion), tabuList, tabuLength)
-                                        self.moveArea(area, region)
-                                        self.objInfo = obj4Move
-                                        aspireOBJ = obj4Move
-                                        currentOBJ = obj4Move
-                                        aspireRegions = self.returnRegions()
-                                        region2AreaAspire = deepcopy(self.region2Area)
-                                        area2RegionAspire = deepcopy(self.area2Region)
-                                        currentRegions = aspireRegions
-                                        bestAdmisable = obj4Move
-                                        cBreak.append(c)
-                                        c = 1
-                                        run = end
-                                        resList.append([obj4Move, aspireOBJ])
-                                else:
-                                        #  print "CASE 2: does not improve aspirational: ",aspireOBJ,obj4Move
-
-                                        run += 1
-                                        tabuCount += 1
-                                        tabuList = self.updateTabuList((-1, 0), tabuList, tabuLength)
-                                        if tabuCount == end:
-                                                c = convTabu
-                        else:
-                            #  print "move is NOT in tabu list"
-
-                                if (aspireOBJ-obj4Move) > epsilon:
-
-                                        #  print "CASE 3: improves aspirational: ",aspireOBJ,obj4Move
-
-                                        oldRegion = self.area2Region[area]
-                                        tabuList = self.updateTabuList((area, oldRegion), tabuList, tabuLength)
-                                        self.moveArea(area, region)
-                                        self.objInfo = obj4Move
-                                        aspireOBJ = obj4Move
-                                        currentOBJ = obj4Move
-                                        aspireRegions = self.returnRegions()
-                                        region2AreaAspire = deepcopy(self.region2Area)
-                                        area2RegionAspire = deepcopy(self.area2Region)
-                                        currentRegions = aspireRegions
-                                        bestAdmisable = obj4Move
-                                        cBreak.append(c)
-                                        c = 1
-                                        run = end
-                                        resList.append([obj4Move, aspireOBJ])
-                                else:
-                                        #  print "CASE 4: does not improve aspirational: ",aspireOBJ,obj4Move
-
-                                        oldRegion = self.area2Region[area]
-                                        tabuList = self.updateTabuList((area, oldRegion), tabuList, tabuLength)
-                                        self.moveArea(area, region)
-                                        self.objInfo = obj4Move
-                                        currentOBJ = obj4Move
-                                        currentRegions = self.returnRegions()
-                                        bestAdmisable = obj4Move
-
-                                        #  cBreak.append(99)
-
-                                        c += 1
-                                        run = end
-                                        resList.append([obj4Move, aspireOBJ])
-                    else:
+                    if candidate == 0:
                         c += convTabu
+                        continue
+
+                    if move in tabuList:
+                        if (aspireOBJ - obj4Move) > epsilon:
+                            oldRegion = self.area2Region[area]
+                            tabuList = self.updateTabuList((area, oldRegion),
+                                                           tabuList, tabuLength)
+                            self.moveArea(area, region)
+                            self.objInfo = obj4Move
+                            aspireOBJ = obj4Move
+                            currentOBJ = obj4Move
+                            aspireRegions = self.returnRegions()
+                            currentRegions = aspireRegions
+                            region2AreaAspire = deepcopy(self.region2Area)
+                            area2RegionAspire = deepcopy(self.area2Region)
+                            bestAdmisable = obj4Move
+                            cBreak.append(c)
+                            c = 1
+                            run = end
+                            resList.append([obj4Move, aspireOBJ])
+                        else:
+                            run += 1
+                            tabuCount += 1
+                            tabuList = self.updateTabuList((-1, 0),
+                                                           tabuList, tabuLength)
+                            if tabuCount == end:
+                                c = convTabu
+                    else:
+                        oldRegion = self.area2Region[area]
+                        tabuList = self.updateTabuList((area, oldRegion),
+                                                       tabuList, tabuLength)
+                        self.moveArea(area, region)
+                        self.objInfo = obj4Move
+                        currentOBJ = obj4Move
+                        if (aspireOBJ - obj4Move) > epsilon:
+                            aspireOBJ = obj4Move
+                            aspireRegions = self.returnRegions()
+                            currentRegions = self.returnRegions()
+                            region2AreaAspire = deepcopy(self.region2Area)
+                            area2RegionAspire = deepcopy(self.area2Region)
+                            cBreak.append(c)
+                            c = 1
+                        else:
+                            currentRegions = self.returnRegions()
+                            c += 1
+                        bestAdmisable = obj4Move
+                        run = end
+                        resList.append([obj4Move, aspireOBJ])
+
         self.objInfo = aspireOBJ
         self.regions = aspireRegions
         self.region2Area = deepcopy(region2AreaAspire)
         self.area2Region = deepcopy(area2RegionAspire)
-
-        #  print "FINAL SOLUTION IN TABU",self.objInfo,self.regions
-
         self.resList = resList
         self.cBreak = cBreak
 
