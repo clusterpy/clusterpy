@@ -8,12 +8,12 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import numpy
 import time as tm
-from componentsAlg import AreaManager
-from componentsAlg import ExtendedMemory
-from componentsAlg import RegionMaker
-from multiprocessing import Process, Queue, Pool
+from numpy import unique as npunique
+from clusterpy.core.toolboxes.cluster.componentsAlg import AreaManager
+from clusterpy.core.toolboxes.cluster.componentsAlg import ExtendedMemory
+from clusterpy.core.toolboxes.cluster.componentsAlg import RegionMaker
+from multiprocessing import Pool
 
 __all__ = ['execArisel']
 
@@ -128,17 +128,13 @@ def execArisel(y, w, pRegions, inits=3, initialSolution=[],
 
     """
     lenY = len(y)
-    i = 0
     start = 0.0
-    time1 = 0.0
     time2 = 0.0
-    extendedMemoryObjInfo = 0.0
-    rmObjInfo = 0.0
 
     print "Running original Arisel algorithm"
     print "Number of areas: ", lenY
     if initialSolution:
-        print "Number of regions: ", len(numpy.unique(initialSolution))
+        print "Number of regions: ", len(npunique(initialSolution))
         pRegions = len(set(initialSolution))
     else:
         print "Number of regions: ", pRegions
