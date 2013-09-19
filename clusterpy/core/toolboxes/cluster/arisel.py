@@ -27,8 +27,6 @@ def constructPossible(am, pRegions, initialSolution, distanceType, distanceStat,
                      selectionType = selectionType,
                      objectiveFunctionType = objectiveFunctionType)
     return rm
-#    par_queue.put(rm)
-
 
 def execArisel(y, w, pRegions, inits=3, initialSolution=[],
                convTabu=0, tabuLength=10):
@@ -179,22 +177,19 @@ def execArisel(y, w, pRegions, inits=3, initialSolution=[],
     extendedMemory.updateExtendedMemory(rm)
 
     rm.recoverFromExtendedMemory(extendedMemory)
-    print "initial Solution: ", rm.returnRegions()
-    print "initial O.F: ", rm.objInfo
+    print "INITIAL SOLUTION: ", rm.returnRegions(), "\nINITIAL OF: ", rm.objInfo
     rm.tabuMove(tabuLength=tabuLength, convTabu=convTabu)
     time2 = tm.time() - start
     Sol = rm.regions
     Of = rm.objInfo
-    print "FINAL SOLUTION: ", Sol
-    print "FINAL OF: ", Of
+    print "FINAL SOLUTION: ", Sol, "\nFINAL OF: ", Of
     output = { "objectiveFunction": Of,
-    "runningTime": time2,
-    "algorithm": "arisel",
-    "regions": len(Sol),
-    "r2a": Sol,
-    "distanceType": distanceType,
-    "distanceStat": distanceStat,
-    "selectionType": selectionType,
-    "ObjectiveFuncionType": objectiveFunctionType}
-    print "Done"
+               "runningTime": time2,
+               "algorithm": "arisel",
+               "regions": len(Sol),
+               "r2a": Sol,
+               "distanceType": distanceType,
+               "distanceStat": distanceStat,
+               "selectionType": selectionType,
+               "ObjectiveFuncionType": objectiveFunctionType}
     return output
