@@ -20,8 +20,6 @@ from areacl import AreaCl
 from helperfunctions import sortedKeys
 from os import getpid
 
-cachedObj = {}
-cachedFeasible = {}
 class RegionMaker:
     """
     This class deals with a large amount of methods required during both the
@@ -599,8 +597,7 @@ class RegionMaker:
 
     def getObjective(self, region2AreaDict):
         """
-        Return the value of the objective function from regions to area dictionary
-        """
+        Return the value of the objective function from regions2area dictionary
 
         This function acts as a proxy function since the idea behind the
         getObjective and getObjectiveFast is the same. When the non-fast
@@ -637,17 +634,22 @@ class RegionMaker:
 
         else:
             i = 0
-            for oFT in self.objectiveFunctionType:
+            for oFT in _objFunType:
                 if len(self.indexDataOF) == 0:
                     indexData = range(len(self.areas[0].data))
                 else:
                     indexData = self.indexDataOF[i]
+
                 if len(self.weightsObjectiveFunctionType) > 0:
-                    distance += self.weightsObjectiveFunctionType[i] * self.objectiveFunctionTypeDispatcher[oFT](self, region2AreaDict, indexData)
+                    _fun = self.objectiveFunctionTypeDispatcher[oFT]
+                    distance += (self.weightsObjectiveFunctionType[i] *
+                                 _fun(self, region2AreaDict, indexData))
+                    i += 1
                 else:
-                    distance += self.objectiveFunctionTypeDispatcher[oFT](self, region2AreaDict, indexData)
-                i += 1
-            return distance
+                    _fun = self.objectiveFunctionTypeDispatcher[oFT]
+                    distance += _fun(self, region2AreaDict, indexData)
+
+        return distance
 
     def getLambda(self):
         L = npmatrix(npidentity(self.pRegions))
