@@ -22,12 +22,6 @@ def distanceA2AEuclideanSquared(x, std=[], w=[]):
     This function calcule the Euclidean Squared distance between
     two or more variables.
     """
-    distance = []
-    d = []
-    sublist = []
-    d2 = 0.0
-    numrows = 0
-    row = 0
 
     if std:
         x = nparray(x)
