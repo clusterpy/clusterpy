@@ -64,12 +64,12 @@ class RegionMaker:
         @type alpha: float.
         @keyword alpha: float equal or between the interval [0,1]; for GRASP selection only.
 
-        @type numRegionsType: strigng
+        @type numRegionsType: string
         @keyword numRegionsType: Type of constructive method (Exogenous, EndogenousThreshold,
         EndogenousRange), by default "Exogenous"
 
         @type objectiveFunctionType: string
-        @keyword objectiveFunctionType: Methosd to calculate the objective function, by default "Total"
+        @keyword objectiveFunctionType: Method to calculate the objective function, by default "Total"
 
         @type threshold: float
         @keyword threshold: Minimum population threshold to be satisfied for each region
@@ -382,7 +382,7 @@ class RegionMaker:
 
     def assignAreaStep1(self, areaID, regionID):
         """
-        Assgin an area to a region
+        Assign an area to a region
         """
         a = self.areas[areaID]
         neighs = a.neighs
