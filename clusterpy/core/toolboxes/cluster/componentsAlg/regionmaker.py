@@ -798,20 +798,20 @@ class RegionMaker:
             regions4Move = list(self.intraBorderingAreas[area])
             if (len(self.region2Area[regionIn]) > 1):
                 for region in regions4Move:
-                    f = self.checkFeasibility(regionIn, area, self.region2Area)
-                    if f == 1:
+                    _feasible = self.checkFeasibility(regionIn, area, self.region2Area)
+                    if _feasible == 1:
+                        self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
                         if self.numRegionsType == "Exogenous":
-                            self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
                             modifiedRegions = [region, regionIn]
                             obj = self.recalcObj(region2AreaCopy, modifiedRegions)
                             self.neighSolutions[(area, region)] = obj
-                            self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
-                        elif self.numRegionsType == "EndogenousThreshold":
-                            self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
-                            if self.regionValue[region] >= self.regionalThreshold and self.regionValue[regionIn] >= self.regionalThreshold:
-                                obj = self.recalcObj(region2AreaCopy)
-                                self.neighSolutions[(area, region)] = obj
-                            self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
+                        elif (self.numRegionsType == "EndogenousThreshold" and
+                              self.regionValue[region] >= self.regionalThreshold and
+                              self.regionValue[regionIn] >= self.regionalThreshold):
+                            obj = self.recalcObj(region2AreaCopy)
+                            self.neighSolutions[(area, region)] = obj
+
+                        self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
 
     def allMoves(self):
         """
