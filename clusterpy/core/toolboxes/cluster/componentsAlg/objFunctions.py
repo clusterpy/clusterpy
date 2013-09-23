@@ -12,7 +12,7 @@ __email__ = "contacto@rise-group.org"
 
 from distanceFunctions import distMethods
 
-def getObjectiveFunctionSumSquares(RegionMaker, region2AreaDict, indexData=[]):
+def getObjectiveFunctionSumSquares(regionMaker, region2AreaDict, indexData=[]):
     """
     Sum of squares from each area to the region's centroid
     """
@@ -21,22 +21,22 @@ def getObjectiveFunctionSumSquares(RegionMaker, region2AreaDict, indexData=[]):
     for region in region2AreaDict.keys():
         objDict[region] = 0.0
         areasIdsIn = region2AreaDict[region]
-        areasInNow = [RegionMaker.areas[aID] for aID in areasIdsIn]
-        dataAvg = RegionMaker.am.getDataAverage(areasIdsIn, indexData)
+        areasInNow = [regionMaker.areas[aID] for aID in areasIdsIn]
+        dataAvg = regionMaker.am.getDataAverage(areasIdsIn, indexData)
         c = 1
         for area in areasInNow:
             areaData = []
             for index in indexData:
                 areaData += [area.data[index]]
             data = [areaData] + [dataAvg]
-            areaDistance = distMethods[RegionMaker.distanceType](data)
+            areaDistance = distMethods[regionMaker.distanceType](data)
             dist = areaDistance[0][0]
             objDict[region] += dist
     obj = sum(objDict.values())
     return obj
 
 cachedObj = {}
-def getObjectiveFunctionSumSquaresFast(RegionMaker, region2AreaDict, modifiedRegions, indexData=[]):
+def getObjectiveFunctionSumSquaresFast(regionMaker, region2AreaDict, modifiedRegions, indexData=[]):
     """
     Sum of squares from each area to the region's centroid
     """
@@ -62,8 +62,8 @@ def getObjectiveFunctionSumSquaresFast(RegionMaker, region2AreaDict, modifiedReg
             if cachedObj.has_key(key):
                 valRegion = cachedObj[key]
             else:
-                areasInNow = [RegionMaker.areas[aID] for aID in areasIdsIn]
-                dataAvg = RegionMaker.am.getDataAverage(areasIdsIn, indexData)
+                areasInNow = [regionMaker.areas[aID] for aID in areasIdsIn]
+                dataAvg = regionMaker.am.getDataAverage(areasIdsIn, indexData)
                 
                 for area in areasInNow:
                     areaData = []
@@ -72,13 +72,13 @@ def getObjectiveFunctionSumSquaresFast(RegionMaker, region2AreaDict, modifiedReg
                         areaData.append(areaDataList[index])
                     areaData = [areaData] + [dataAvg]
                     # Taking the first element from the dataDistance
-                    dist = distMethods[RegionMaker.distanceType](areaData)[0][0]
+                    dist = distMethods[regionMaker.distanceType](areaData)[0][0]
                     valRegion += dist
                     
                 cachedObj[key] = valRegion
             obj += valRegion
         else:
-            obj += RegionMaker.objDict[region] 
+            obj += regionMaker.objDict[region]
     return obj
 
 
@@ -86,27 +86,27 @@ objectiveFunctionTypeDispatcher = {}
 objectiveFunctionTypeDispatcher["SS"] = getObjectiveFunctionSumSquares
 objectiveFunctionTypeDispatcher["SSf"] = getObjectiveFunctionSumSquaresFast
 
-def makeObjDict(RegionMaker, indexData=[]):
+def makeObjDict(regionMaker, indexData=[]):
     """
     constructs a dictionary with the objective function per region
     """
     objDict = {}
-    if len(RegionMaker.indexDataOF) == 0:
-        indexData = range(len(RegionMaker.areas[0].data))
+    if len(regionMaker.indexDataOF) == 0:
+        indexData = range(len(regionMaker.areas[0].data))
     else:
-        indexData = RegionMaker.indexDataOF
-    for region in RegionMaker.region2Area.keys():
+        indexData = regionMaker.indexDataOF
+    for region in regionMaker.region2Area.keys():
         objDict[region] = 0.0
-        areasIdsIn = RegionMaker.region2Area[region]
-        areasInNow = [RegionMaker.areas[aID] for aID in areasIdsIn]
-        dataAvg = RegionMaker.am.getDataAverage(areasIdsIn, indexData)
+        areasIdsIn = regionMaker.region2Area[region]
+        areasInNow = [regionMaker.areas[aID] for aID in areasIdsIn]
+        dataAvg = regionMaker.am.getDataAverage(areasIdsIn, indexData)
         c = 1
         for area in areasInNow:
             areaData = []
             for index in indexData:
                 areaData += [area.data[index]]
             data = [areaData] + [dataAvg]
-            areaDistance = distMethods[RegionMaker.distanceType](data)
+            areaDistance = distMethods[regionMaker.distanceType](data)
             dist = areaDistance[0][0]
             objDict[region] += dist
     return objDict
