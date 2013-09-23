@@ -602,40 +602,40 @@ class RegionMaker:
         Return the value of the objective function from regions to area dictionary
         """
 
-        if (type(self.objectiveFunctionType) == type('objectiveFunctionType')):
-            if len(self.indexDataOF) == 0:
-                indexData = range(len(self.areas[0].data))
-            else:
-                indexData = self.indexDataOF
-            return self.objectiveFunctionTypeDispatcher[self.objectiveFunctionType](self, region2AreaDict, indexData)
-        else:
-            distance = 0.0
-            i = 0
-            for oFT in self.objectiveFunctionType:
-                if len(self.indexDataOF) == 0:
-                    indexData = range(len(self.areas[0].data))
-                else:
-                    indexData = self.indexDataOF[i]
-                if len(self.weightsObjectiveFunctionType) > 0:
-                    distance += self.weightsObjectiveFunctionType[i] * self.objectiveFunctionTypeDispatcher[oFT](self, region2AreaDict, indexData)
-                else:
-                    distance += self.objectiveFunctionTypeDispatcher[oFT](self, region2AreaDict, indexData)
-                i += 1
-            return distance
+        This function acts as a proxy function since the idea behind the
+        getObjective and getObjectiveFast is the same. When the non-fast
+        approach is needed, this function will call getObjectiveFast with the
+        extra parameter as None. This way the fast function will execute as the
+        non-fast would have.
+        """
+        return self.getObjectiveFast(region2AreaDict, modifiedRegions=None)
 
     def getObjectiveFast(self, region2AreaDict, modifiedRegions=[]):
         """
-        Return the value of the objective function from regions to area dictionary
-        """
+        Return the value of the objective function from regions2area dictionary
 
-        if (type(self.objectiveFunctionType) == type('objectiveFunctionType')):
+        When this function gets called, the objectiveFunctionType property
+        could be either a String representing the type of the function (the
+        common case), or could be a list of function types, in which case it's
+        necessary to iterate over all the functions.
+        """
+        distance = 0.0
+        _objFunType = self.objectiveFunctionType
+
+        if isinstance(_objFunType, "".__class__):
             if len(self.indexDataOF) == 0:
                 indexData = range(len(self.areas[0].data))
             else:
                 indexData = self.indexDataOF
-            return self.objectiveFunctionTypeDispatcher[self.objectiveFunctionType+'f'](self, region2AreaDict, modifiedRegions, indexData)
+            _fun = None
+            if modifiedRegions == None:
+                _fun = self.objectiveFunctionTypeDispatcher[_objFunType]
+                distance = _fun(self, region2AreaDict, indexData)
+            else:
+                _fun = self.objectiveFunctionTypeDispatcher[_objFunType+'f']
+                distance = _fun(self, region2AreaDict, modifiedRegions, indexData)
+
         else:
-            distance = 0.0
             i = 0
             for oFT in self.objectiveFunctionType:
                 if len(self.indexDataOF) == 0:
