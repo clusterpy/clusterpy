@@ -12,11 +12,12 @@ __email__ = "contacto@rise-group.org"
 
 from distanceFunctions import distMethods
 
-def getObjectiveFunctionSumSquares(regionMaker, region2AreaDict, indexData=[]):
+def getObjectiveFunctionSumSquares(regionMaker,
+                                   region2AreaDict,
+                                   indexData=[]):
     """
     Sum of squares from each area to the region's centroid
     """
-    dist = 0.0
     objDict = {}
     for region in region2AreaDict.keys():
         objDict[region] = 0.0
@@ -30,28 +31,19 @@ def getObjectiveFunctionSumSquares(regionMaker, region2AreaDict, indexData=[]):
                 areaData += [area.data[index]]
             data = [areaData] + [dataAvg]
             areaDistance = distMethods[regionMaker.distanceType](data)
-            dist = areaDistance[0][0]
-            objDict[region] += dist
-    obj = sum(objDict.values())
-    return obj
+            objDict[region] += areaDistance[0][0]
+    return sum(objDict.values())
 
 cachedObj = {}
-def getObjectiveFunctionSumSquaresFast(regionMaker, region2AreaDict, modifiedRegions, indexData=[]):
+def getObjectiveFunctionSumSquaresFast(regionMaker,
+                                       region2AreaDict,
+                                       modifiedRegions,
+                                       indexData=[]):
     """
     Sum of squares from each area to the region's centroid
     """
     obj = 0.0
-    valRegion = 0.0
-    dist = 0.0
     r2aDictKeys = region2AreaDict.keys()
-    region = 0
-    aID = 0
-    index = 0
-    areasIdsIn = []
-    areasInNow = []
-    dataAvg = []
-    areaData = []
-    areaDataList = []
     for region in r2aDictKeys:
         if region in modifiedRegions:
             valRegion = 0.0
@@ -62,9 +54,9 @@ def getObjectiveFunctionSumSquaresFast(regionMaker, region2AreaDict, modifiedReg
             if cachedObj.has_key(key):
                 valRegion = cachedObj[key]
             else:
-                areasInNow = [regionMaker.areas[aID] for aID in areasIdsIn]
+                areasInNow = [regionMaker.areas[_aid] for _aid in areasIdsIn]
                 dataAvg = regionMaker.am.getDataAverage(areasIdsIn, indexData)
-                
+
                 for area in areasInNow:
                     areaData = []
                     areaDataList = area.data
@@ -74,13 +66,12 @@ def getObjectiveFunctionSumSquaresFast(regionMaker, region2AreaDict, modifiedReg
                     # Taking the first element from the dataDistance
                     dist = distMethods[regionMaker.distanceType](areaData)[0][0]
                     valRegion += dist
-                    
+
                 cachedObj[key] = valRegion
             obj += valRegion
         else:
             obj += regionMaker.objDict[region]
     return obj
-
 
 objectiveFunctionTypeDispatcher = {}
 objectiveFunctionTypeDispatcher["SS"] = getObjectiveFunctionSumSquares
@@ -110,5 +101,3 @@ def makeObjDict(regionMaker, indexData=[]):
             dist = areaDistance[0][0]
             objDict[region] += dist
     return objDict
-
-
