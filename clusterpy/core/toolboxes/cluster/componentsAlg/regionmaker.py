@@ -105,8 +105,6 @@ class RegionMaker:
         self.externalNeighs = set([])
         self.alpha = alpha
         self.numRegionsType = numRegionsType
-        self.objectiveFunctionTypeDispatcher = objectiveFunctionTypeDispatcher
-        self.selectionTypeDispatcher = selectionTypeDispatcher
         self.neighSolutions = {(0,0): 9999}
         self.regionMoves = set([])
         self.distances = {}
@@ -564,7 +562,7 @@ class RegionMaker:
             self.changedRegion = lastRegion
         if self.numRegionsType == "EndogenousRange":
             self.filterCandidate(self.toRemove)
-        self.selectionTypeDispatcher[self.selectionType](self)
+        selectionTypeDispatcher[self.selectionType](self)
 
     def filterCandidate(self, removeCandidate=[]):
         """
@@ -626,11 +624,11 @@ class RegionMaker:
                 indexData = self.indexDataOF
             _fun = None
             if modifiedRegions == None:
-                _fun = self.objectiveFunctionTypeDispatcher[_objFunType]
+                _fun = objectiveFunctionTypeDispatcher[_objFunType]
                 distance = _fun(self, region2AreaDict, indexData)
             else:
-                _fun = self.objectiveFunctionTypeDispatcher[_objFunType+'f']
-                distance = _fun(self, region2AreaDict, modifiedRegions, indexData)
+                _fun = objectiveFunctionTypeDispatcher[_objFunType+'f']
+                distance=_fun(self, region2AreaDict, modifiedRegions, indexData)
 
         else:
             i = 0
@@ -641,12 +639,12 @@ class RegionMaker:
                     indexData = self.indexDataOF[i]
 
                 if len(self.weightsObjectiveFunctionType) > 0:
-                    _fun = self.objectiveFunctionTypeDispatcher[oFT]
+                    _fun = objectiveFunctionTypeDispatcher[oFT]
                     distance += (self.weightsObjectiveFunctionType[i] *
                                  _fun(self, region2AreaDict, indexData))
                     i += 1
                 else:
-                    _fun = self.objectiveFunctionTypeDispatcher[oFT]
+                    _fun = objectiveFunctionTypeDispatcher[oFT]
                     distance += _fun(self, region2AreaDict, indexData)
 
         return distance
