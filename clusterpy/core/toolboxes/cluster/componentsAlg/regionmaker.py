@@ -279,12 +279,12 @@ class RegionMaker:
         localDistanceType = self.distanceType
         localreturnDistance2Area = AreaCl.returnDistance2Area
         nprandom.seed(getpid())
-        for k in range(self.pRegions):
+        for k in xrange(self.pRegions):
             random = nprandom.uniform(0, 1)
             find = False
             acum = 0
             cont = 0
-            while find == False:
+            while not find:
                 inf = acum
                 sup = acum + probabilities[cont]
                 if inf <= random <= sup:
@@ -304,7 +304,9 @@ class RegionMaker:
                                 k = (0,0)
                             cached = cachedDistances.get(k, -1)
                             if cached < 0:
-                                newDist = localreturnDistance2Area(currentArea, selfAmAreas[x], distanceType=localDistanceType)
+                                newDist = localreturnDistance2Area(currentArea,
+                                                                   selfAmAreas[x],
+                                                                   distanceType = localDistanceType)
                                 tempMap.append(newDist)
                                 cachedDistances[k] = newDist
 
@@ -527,16 +529,16 @@ class RegionMaker:
             a = self.areas[areaID]
             regionIDs = list(self.potentialRegions4Area[areaID])
             for region in regionIDs:
-                if (self.numRegionsType != "Exogenous" and self.constructionStage == "growing"
-                        and region in self.feasibleRegions):
-
-                    #  once a region reaches the threshold its grow is rejected until the
-                    #  assignation of enclaves
-
-                    pass
+                if (self.numRegionsType != "Exogenous" and
+                    self.constructionStage == "growing"
+                    and region in self.feasibleRegions):
+                    #  Once a region reaches the threshold, the grow is
+                    #  rejected until the assignation of enclaves
+                    continue
                 else:
                     if filteredCandidates == -99:
-                        if areaID not in self.newExternal and region != self.changedRegion:
+                        if (areaID not in self.newExternal and
+                            region != self.changedRegion):
                             lastRegion = region
                             pass
                         else:
@@ -570,9 +572,9 @@ class RegionMaker:
         """
         if len(removeCandidate) > 0:
             toRemove = []
-            for id in removeCandidate:
-                for cand,reg in self.candidateInfo.keys():
-                    if cand == id:
+            for _id in removeCandidate:
+                for cand, reg in self.candidateInfo.keys():
+                    if cand == _id:
                         toRemove.append((cand, reg))
             for remov in toRemove:
                 self.candidateInfo.pop(remov)
@@ -775,12 +777,13 @@ class RegionMaker:
                     obj = self.recalcObj(region2AreaCopy)
                     self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
                     if obj < self.objInfo:
-                        f = self.checkFeasibility(regionIn, area, self.region2Area)
-                        if f == 1:
+                        _feasible = self.checkFeasibility(regionIn, area, self.region2Area)
+                        if _feasible == 1:
                             if self.numRegionsType == "Exogenous":
                                 self.neighSolutions[(area, region)] = obj
                             elif self.numRegionsType == "EndogenousThreshold":
-                                if self.regionValue[region] >= self.regionalThreshold and self.regionValue[regionIn] >= self.regionalThreshold:
+                                if (self.regionValue[region] >= self.regionalThreshold and
+                                    self.regionValue[regionIn] >= self.regionalThreshold):
                                     self.neighSolutions[(area,region)] = obj
 
     def allCandidates(self):
