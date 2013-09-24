@@ -475,7 +475,7 @@ class RegionMaker:
         """
         Returns bordering areas of a region
         """
-        areas2Eval = self.returnRegion2Area(regionID)
+        areas2Eval = self.region2Area[regionID]
         borderingAreas = set([])
         for area in areas2Eval:
             try:
@@ -513,12 +513,6 @@ class RegionMaker:
                     self.intraBorderingAreas[neigh]=self.intraBorderingAreas[neigh]|set([regionID])
                 except:
                     self.intraBorderingAreas[neigh]=set([regionID])
-
-    def returnRegion2Area(self, regionID):
-        """
-        Return the areas of a region
-        """
-        return self.region2Area[regionID]
 
     def constructRegions(self, filteredCandidates=-99, filteredReg=-99):
         """
@@ -1031,7 +1025,7 @@ class RegionMaker:
 
                 # step 4
 
-                borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.returnRegion2Area(region)))
+                borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                 improve = 0
                 while len(borderingAreas) > 0:
 
@@ -1053,7 +1047,7 @@ class RegionMaker:
                             if obj <= self.objInfo:
                                 self.moveArea(area, move)
                                 improve = 1
-                                borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.returnRegion2Area(region)))
+                                borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                                 break
 
     def AZPSA(self, alpha, temperature):
@@ -1084,7 +1078,7 @@ class RegionMaker:
 
                 # step 4
 
-                borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.returnRegion2Area(region)))
+                borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                 improve = 0
                 while len(borderingAreas) > 0:
                     # step 5
@@ -1120,7 +1114,7 @@ class RegionMaker:
                                 #  print "--- New Objective Function value: ", obj
                                 #  step 4
 
-                                borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.returnRegion2Area(region)))
+                                borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                                 break
                             else:
                                 random = nprandom.rand(1)[0]
@@ -1136,7 +1130,7 @@ class RegionMaker:
                                     #  print "--- New Objective Function value: ", obj
                                     #  step 4
 
-                                    borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.returnRegion2Area(region)))
+                                    borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                                     break
         self.objInfo = bestOBJ
         self.region2Area = deepcopy(region2AreaBest)
