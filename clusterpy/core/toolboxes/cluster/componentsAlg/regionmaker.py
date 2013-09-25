@@ -785,28 +785,30 @@ class RegionMaker:
         Select neighboring solutions.
         """
         intraCopy = deepcopy(self.intraBorderingAreas)
-        region2AreaCopy = deepcopy(self.region2Area)
-        area2RegionCopy = deepcopy(self.area2Region)
-        self.neighSolutions = {}
+        reg2AreaCp = deepcopy(self.region2Area)
+        area2RegionCp = deepcopy(self.area2Region)
+        neighSolutions = {}
+
         for area in intraCopy.keys():
             regionIn = self.area2Region[area]
             regions4Move = list(self.intraBorderingAreas[area])
             if (len(self.region2Area[regionIn]) > 1):
                 for region in regions4Move:
-                    _feasible = self.checkFeasibility(regionIn, area, self.region2Area)
+                    _feasible = self.checkFeasibility(regionIn, area)
                     if _feasible == 1:
-                        self.swapArea(area, region, region2AreaCopy, area2RegionCopy)
+                        self.swapArea(area, region, reg2AreaCp, area2RegionCp)
                         if self.numRegionsType == "Exogenous":
                             modifiedRegions = [region, regionIn]
-                            obj = self.recalcObj(region2AreaCopy, modifiedRegions)
-                            self.neighSolutions[(area, region)] = obj
+                            obj = self.recalcObj(reg2AreaCp, modifiedRegions)
+                            neighSolutions[(area, region)] = obj
                         elif (self.numRegionsType == "EndogenousThreshold" and
                               self.regionValue[region] >= self.regionalThreshold and
                               self.regionValue[regionIn] >= self.regionalThreshold):
-                            obj = self.recalcObj(region2AreaCopy)
-                            self.neighSolutions[(area, region)] = obj
+                            obj = self.recalcObj(reg2AreaCp)
+                            neighSolutions[(area, region)] = obj
+                        self.swapArea(area, regionIn, reg2AreaCp, area2RegionCp)
 
-                        self.swapArea(area, regionIn, region2AreaCopy, area2RegionCopy)
+        self.neighSolutions = neighSolutions
 
     def allMoves(self):
         """
