@@ -485,12 +485,6 @@ class RegionMaker:
                 pass
         return borderingAreas
 
-    def returnIntraBorderingAreas(self):
-        """
-        Returns intrabordering areas
-        """
-        return self.intraBorderingAreas
-
     def getIntraBorderingAreas(self):
         """
         Gets the intrabordering areas
@@ -1034,7 +1028,7 @@ class RegionMaker:
                     randomArea = nprandom.randint(0, len(borderingAreas))
                     area = borderingAreas[randomArea]
                     borderingAreas.remove(area)
-                    posibleMove = list(self.returnIntraBorderingAreas()[area])
+                    posibleMove = list(self.intraBorderingAreas[area])
                     if len(self.region2Area[region]) >= 2:
                         f = self.checkFeasibility(region, area, self.region2Area)
                     else:
@@ -1086,7 +1080,7 @@ class RegionMaker:
                     randomArea = nprandom.randint(0, len(borderingAreas))
                     area = borderingAreas[randomArea]
                     borderingAreas.remove(area)
-                    posibleMove = list(self.returnIntraBorderingAreas()[area])
+                    posibleMove = list(self.intraBorderingAreas[area])
                     if len(self.region2Area[region]) >= 2:
                         f = self.checkFeasibility(region, area, self.region2Area)
                     else:
@@ -1398,9 +1392,3 @@ class RegionMaker:
         self.area2Region = extendedMemory.area2Region
         self.region2Area = extendedMemory.region2Area
         self.intraBorderingAreas = extendedMemory.intraBorderingAreas
-
-    def getSeeds(self):
-        """
-        Return the seeds of the solution
-        """
-        return self.seeds
