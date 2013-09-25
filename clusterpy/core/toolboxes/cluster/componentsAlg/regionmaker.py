@@ -512,6 +512,11 @@ class RegionMaker:
         """
         Construct potential regions per area
         """
+        _d_stat = self.distanceStat
+        _wd_stat = self.weightsDistanceStat
+        _ida_stat = self.indexDataStat
+        _fun_am_d2r = self.am.getDistance2Region
+
         lastRegion = 0
         for areaID in self.potentialRegions4Area.keys():
             a = self.areas[areaID]
@@ -530,24 +535,25 @@ class RegionMaker:
                             lastRegion = region
                             pass
                         else:
+                            _reg_dist = 0.0
                             if self.selectionType != "FullRandom":
-                                areasIdsIn = self.region2Area[region]
-                                areasInNow = [ self.areas[aID] for aID in areasIdsIn ]
-                                regionDistance = self.am.getDistance2Region(self.areas[areaID], self.region2Area[region],
-                                    distanceStat = self.distanceStat, weights = self.weightsDistanceStat,
-                                    indexData = self.indexDataStat)
-                            else:
-                                regionDistance = 0.0
-                            self.candidateInfo[(areaID, region)] = regionDistance
-                    elif filteredCandidates != -99 and areaID in filteredCandidates and region == filteredReg:
-                        areasIdsIn = self.region2Area[region]
-                        areasInNow = [ self.areas[aID] for aID in areasIdsIn ]
-                        regionDistance = self.am.getDistance2Region(self.areas[areaID], self.region2Area[region],
-                            distanceStat = self.distanceStat, weights = self.weightsDistanceStat,
-                            indexData = self.indexDataStat)
-                        self.candidateInfo[(areaID, region)] = regionDistance
-                    else:
-                        pass
+                                _reg_dist = _fun_am_d2r(self.areas[areaID],
+                                                        self.region2Area[region],
+                                                        distanceStat = _d_stat,
+                                                        weights = _wd_stat,
+                                                        indexData = _ida_stat)
+                            self.candidateInfo[(areaID, region)] = _reg_dist
+
+                    elif (filteredCandidates != -99 and
+                          areaID in filteredCandidates and
+                          region == filteredReg):
+                        _reg_dist = _fun_am_d2r(self.areas[areaID],
+                                                self.region2Area[region],
+                                                distanceStat = _d_stat,
+                                                weights = _wd_stat,
+                                                indexData = _ida_stat)
+                        self.candidateInfo[(areaID, region)] = _reg_dist
+
         if len(self.candidateInfo) == 0:
             self.changedRegion = lastRegion
         if self.numRegionsType == "EndogenousRange":
