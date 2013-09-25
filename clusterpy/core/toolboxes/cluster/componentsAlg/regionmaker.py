@@ -696,7 +696,7 @@ class RegionMaker:
         """
         Re-calculate the value of the objective function
         """
-        if "objDict" in dir(self):
+        if hasattr(self, 'objDict'):
             obj = self.getObjectiveFast(region2AreaDict, modifiedRegions)
         else:
             obj = self.getObjective(region2AreaDict)
@@ -812,7 +812,7 @@ class RegionMaker:
             regions4Move = list(self.intraBorderingAreas[area])
             if len(self.region2Area[regionIn]) > 1:
                 for region in regions4Move:
-                    moves = moves + [(area, region)]
+                    moves.append((area, region))
         return moves
 
     def swapArea(self, area, newRegion, region2AreaDict, area2RegionDict):
