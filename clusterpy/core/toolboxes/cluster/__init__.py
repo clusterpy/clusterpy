@@ -8,7 +8,7 @@ __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
 __all__ = ['execAZP','execArisel','execAZPRTabu','execAZPSA','execAZPTabu', \
-           'execMaxpTabu', 'execRandom', \
+           'execPregionsExact','execMaxpTabu', 'execRandom', \
            'execAMOEBA','originalSOM','geoSom']
 
 from amoeba import execAMOEBA
@@ -18,6 +18,8 @@ from azpRtabu import execAZPRTabu
 from azpSa import execAZPSA
 from azpTabu import execAZPTabu
 from geoSOM import geoSom
+from pRegionsExact import execPregionsExact
 from maxpTabu import execMaxpTabu
+#from maxpExact import execMaxpExact
 from random import execRandom
 from som import originalSOM
