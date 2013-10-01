@@ -22,7 +22,6 @@ def distanceA2AEuclideanSquared(x, std=[], w=[]):
     This function calcule the Euclidean Squared distance between
     two or more variables.
     """
-
     if std:
         x = nparray(x)
         x = stdobs(x)  #  standardize
@@ -45,36 +44,13 @@ def distanceA2AEuclideanSquared(x, std=[], w=[]):
 
 def getHammingDistance(X, Y):
     """
-    CLUSTERPY
-    getDistanceHamming(X, Y, distanceType):
-    Description of the function:
     Return the Hamming distance (similarity) of two solutions.
-    Parameters:
-    X: Solution 1
-    Y: Solution 2
-    Outputs:
-    distance: Similarity between the solution (Range [0 - 1])
-    Examples:
-    >>> X = [3, 1, 1, 0, 3, 0, 1, 0, 2, 0, 0, 3, 2, 2, 3, 3]
-    >>> Y = [0, 0, 0, 3, 0, 3, 3, 3, 2, 3, 3, 1, 2, 2, 1, 1]
-    >>> getHammingDistance(X, Y)
-    0.1875
     """
     def recode(X):
         """
-        CLUSTERPY
-        recode(n, m):
-        Description of the function:
         Rename the values of the array according to the order of appearance.
         First value is changed by zero and replaced all occurences, second by
         1 and so on.
-        Parameters
-        X: Array to re-arrange
-        Outputs:
-        XP: Array
-        Examples:
-        >>> recode([3, 1, 1, 0, 3, 0, 1, 0, 2, 0, 0, 3, 2, 2, 3, 3])
-        [0, 1, 1, 2, 0, 2, 1, 2, 3, 2, 2, 0, 3, 3, 0, 0]
         """
         XP = X + []
         i = 0
@@ -119,12 +95,14 @@ def getHammingDistance(X, Y):
 
 def distanceA2AHausdorff(x, y):
     """
-    This function calcule the Hausdorff distance between two
+    This function computes the Hausdorff distance between two
     or more variables.
     """
     distances = []
     for i in range(len(x)):
-        distances = distances + [max(abs(y[i][1] - x[i][0]), abs(x[i][1] - y[i][0]))]
+        _yx = abs(y[i][1] - x[i][0])
+        _xy = abs(x[i][1] - y[i][0])
+        distances = distances + [max(_yx, _xy)]
     distance = max(distances)
     return distance
 
@@ -132,4 +110,3 @@ distMethods = {}
 distMethods['EuclideanSquared'] = distanceA2AEuclideanSquared
 distMethods['Hamming'] = getHammingDistance
 distMethods['Hausdorff'] = distanceA2AHausdorff
-
