@@ -22,10 +22,10 @@ import random
 from toolboxes.cluster.componentsAlg.distanceFunctions import distanceA2AEuclideanSquared
 
 
-__all__ = ['execPregionsExact']
+__all__ = ['execPregionsExactCP']
 
 
-def execPregionsExact(y, w, p=2):
+def execPregionsExactCP(y, w, p=2):
 
     #EXPLICAR QUÉ ES EL P-REGIONS
     """P-regions model
@@ -90,13 +90,66 @@ def execPregionsExact(y, w, p=2):
                 list1.append(distanceA2AEuclideanSquared([y[i],y[j]])[0][0])
         d[i]=list1
 
+
+
 #-----------------------------------
     try: 
 	
 		# CONSTRUCTION OF THE MODEL
 		
 		# Tolerance to non-integer solutions
-		tol = 1e-5 #min value: 1e-9
+		tol = 1e-5#1e-9 #min value: 1e-9
+	
+		# SUBTOUR ELIMINATION CONSTRAINTS
+		def subtourelim(model, where):
+			if where == GRB.callback.MIPSOL:
+				vals = model.cbGetSolution(model.getVars())
+				varsx = model.getVars()[n*n:]
+				varsx1 = [varsx[i:i+n] for i in range(0,len(varsx),n)]
+				t1 = [vals[i:i+n] for i in range(0,n*n,n)]
+				x1 = [vals[n*n+i:n*n+i+n] for i in range(0,n*n,n)]
+				num = list(numA)
+				cycle = [] #sets of areas involved in cycles
+				while num:
+					area = num[0]
+					c =[area]
+					acum = 0
+					k = 0
+					while True:
+						if k==n:
+							break
+						if x1[area][k]>=1-tol:#==1:
+							acum = 1
+							break
+						k += 1
+					f=num.remove(area)
+					for j in numA:
+						if t1[area][j]>=1-tol:#==1:
+							c.append(j)
+							k=0
+							while True:
+								if k==n:
+									break
+								if x1[j][k]>=1-tol:#==1:
+									acum += 1
+									break
+								k += 1
+							if num.count(j)!=0:
+								b =num.remove(j)
+					if acum==len(c) and acum>1:
+						cycle.append(c)	
+				if len(cycle):
+					# add a subtour elimination constraint
+					for cycle_k in cycle:
+							temp1 = 0
+							card = len(cycle_k)
+							for i in cycle_k:
+								for j in cycle_k:
+									if j in w[i]:
+										temp1 += varsx1[i][j]
+							if temp1!=0:
+								model.cbLazy(temp1 <= card-1)
+
 				
 	
 		# Create the new model
@@ -123,14 +176,6 @@ def execPregionsExact(y, w, p=2):
 			for j in numA:
 				x_i.append(m.addVar(vtype=GRB.BINARY,name="x_"+str([i,j])))
 			x.append(x_i)
-			
-		# u_i
-		# Order assigned to each area i in a tree
-		u = []
-		for i in numA:
-			#u.append(m.addVar(lb=1-tol, ub=n-p-tol, vtype=GRB.INTEGER,name="u_"+str(i)))
-			u.append(m.addVar(lb=1, vtype=GRB.INTEGER,name="u_"+str(i)))
-
 			  
 		# Integrate new variables
 		m.update()
@@ -144,18 +189,14 @@ def execPregionsExact(y, w, p=2):
 	
 		m.setObjective(of, GRB.MINIMIZE)
 
-		# Constraints 1, 5, 6
+		# Constraints 1, 5
 		temp = 0
 		for i in numA:
 			for j in w[i]:
 				temp += x[i][j]
-				#m.addConstr(x[i][j]-t[i][j]<=tol,"c5_"+str([i,j]))
-				m.addConstr(x[i][j]-t[i][j]<=0,"c5_"+str([i,j]))
-				#m.addConstr(u[i]-u[j]+(n-p)*x[i][j]+(n-p-2)*x[j][i]<=(l-tol-1),"c6_"+str([i,j]))
-				m.addConstr(u[i]-u[j]+(n-p)*x[i][j]+(n-p-2)*x[j][i]<=(l-1),"c6_"+str([i,j]))
- 		
-		#m.addConstr(temp == l-tol,"c1")
-		m.addConstr(temp == l,"c1")
+				m.addConstr(x[i][j]-t[i][j]<=tol,"c5_"+str([i,j]))
+		
+		m.addConstr(temp == l-tol,"c1")
 
 		# Constraint 2
 		i = 0
@@ -163,29 +204,25 @@ def execPregionsExact(y, w, p=2):
 			temp =[]
 			for j in w[i]:
 				temp.append(x_i[j])
-			#m.addConstr(quicksum(temp) <=1-tol, "c2_"+str(i))
-			m.addConstr(quicksum(temp) <=1, "c2_"+str(i))
+			m.addConstr(quicksum(temp) <=1-tol, "c2_"+str(i))
 			i += 1
 
 		# Constraints 3, 4
 		for i in numA:
 			for j in numA:
 				if i!=j:
-					#m.addConstr(t[i][j]-t[j][i]<=tol,"c4_"+str([i,j]))
-					m.addConstr(t[i][j]-t[j][i]==0,"c4_"+str([i,j]))
+					m.addConstr(t[i][j]-t[j][i]<=tol,"c4_"+str([i,j]))
 					for em in numA:
 						if em!=j:
-							#m.addConstr(t[i][j]+t[i][em]-t[j][em]<=1-tol,"c3_"+str([i,j,em]))
-							m.addConstr(t[i][j]+t[i][em]-t[j][em]<=1,"c3_"+str([i,j,em]))
+							m.addConstr(t[i][j]+t[i][em]-t[j][em]<=1-tol,"c3_"+str([i,j,em]))
 							
 		
 		m.update()
 
-					
 		#Writes the .lp file format of the model
 		#m.write("test.lp")
 		
-		#import pdb; pdb.set_trace()
+		
 		#To reduce memory use
 		m.setParam('Nodefilestart',0.001)
 		# To disable optimization output
@@ -193,23 +230,20 @@ def execPregionsExact(y, w, p=2):
 		#m.setParam('ScaleFlag',0)
 		# To set the tolerance to non-integer solutions
 		m.setParam('IntFeasTol', tol)
+		# To enable lazy constraints
+		m.params.LazyConstraints = 1
 		m.params.timeLimit = 600
-		m.optimize()
-		
-		#do IIS
-		# print 'The model is infeasible; computing IIS'
-		# m.computeIIS()
-		# print '\nThe following constraint(s) cannot be satisfied:'
-		# for c in m.getConstrs():
-			# if c.IISConstr:
-				# print c.constrName
+		#m.params.ResultFile= "resultados.sol"
+		m.optimize(subtourelim)
+					
 			   
 		time = tm.time()-start
    				
 		# for v in m.getVars():
 			# if v.x >0:
 				# print v.varName, v.x
-		  		
+		
+		#import pdb; pdb.set_trace()
 		sol = [0 for k in numA]
 		num = list(numA)
 		regID=0 #Number of region
@@ -223,16 +257,17 @@ def execPregionsExact(y, w, p=2):
 					if num.count(j)!=0:
 						b = num.remove(j)
 			regID += 1
-		
+			
 		f = open("results.txt","a")
-		f.write(str(m.objBound)+"  "+str(m.objVal)+"  "+str(time)+"  "+str(sol)+" ")
-		f.close()	
-		
+		f.write(str(m.objBound)+"  "+str(m.objVal)+"  "+str(time)+" "+str(sol)+" \n")
+		f.close()
+					
 		# print 'FINAL SOLUTION:', sol
 		# print 'FINAL OF:', m.objVal
 		# print 'FINAL bound:', m.objBound
 		# print 'GAP:', m.MIPGap
 		# print "running time", time
+		# print "running timeGR", m.Runtime
 		output = { "objectiveFunction": m.objVal,
 			"running time": time,
 			"algorithm": "pRegionsExact",

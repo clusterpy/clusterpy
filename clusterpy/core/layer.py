@@ -44,6 +44,7 @@ from toolboxes import execAZPRTabu
 from toolboxes import execAZPSA
 from toolboxes import execAZPTabu
 from toolboxes.cluster.pRegionsExact import execPregionsExact
+from toolboxes.cluster.pRegionsExactCP import execPregionsExactCP
 #from toolboxes.cluster.maxpExact import execMaxpExact
 from toolboxes import execMaxpTabu
 from toolboxes import execAMOEBA
@@ -1232,6 +1233,7 @@ algorithm"
             "som": lambda *args, **kargs: originalSOM(*args, **kargs),
             "geoSom": lambda *args, **kargs: geoSom(*args, **kargs),
             "pRegionsExact": lambda *args, **kargs: execPregionsExact(*args, **kargs),
+			"pRegionsExactCP": lambda *args, **kargs: execPregionsExactCP(*args, **kargs),
             "maxpTabu": lambda *args, **kargs: execMaxpTabu(*args, **kargs)
         }[algorithm](*args, **kargs)
         self.outputCluster[name]["weightType"] = wType

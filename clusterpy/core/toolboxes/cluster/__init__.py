@@ -7,8 +7,10 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
+
+#cambiar all
 __all__ = ['execAZP','execArisel','execAZPRTabu','execAZPSA','execAZPTabu', \
-           'execPregionsExact','execMaxpTabu', 'execRandom', \
+           'execPregionsExact','execPregionsExactCP','execMaxpTabu', 'execRandom', \
            'execAMOEBA','originalSOM','geoSom']
 
 from amoeba import execAMOEBA
@@ -19,6 +21,7 @@ from azpSa import execAZPSA
 from azpTabu import execAZPTabu
 from geoSOM import geoSom
 from pRegionsExact import execPregionsExact
+from pRegionsExactCP import execPregionsExactCP
 from maxpTabu import execMaxpTabu
 #from maxpExact import execMaxpExact
 from random import execRandom
