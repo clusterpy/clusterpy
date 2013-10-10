@@ -28,8 +28,8 @@ def constructPossible(am, pRegions, initialSolution, distanceType, distanceStat,
                      objectiveFunctionType = objectiveFunctionType)
     return rm
 
-def execArisel(y, w, pRegions, inits=3, initialSolution=[],
-               convTabu=0, tabuLength=10):
+def execArisel(y, w, pRegions, inits = 3, initialSolution = [],
+               convTabu = 0, tabuLength = 10):
     """Automatic Rationalization with Initial Seed Location
 
     ARiSeL, proposed by [Duque_Church2004]_ , aggregates N areas into P
@@ -163,7 +163,6 @@ def execArisel(y, w, pRegions, inits=3, initialSolution=[],
                                                    selectionType,
                                                    objectiveFunctionType])
         procs.append(ans)
-
 
     results = []
     for p in procs:

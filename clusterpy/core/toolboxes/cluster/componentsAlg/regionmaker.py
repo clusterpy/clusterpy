@@ -833,12 +833,13 @@ class RegionMaker:
         area2RegionDict[area] = newRegion
         if self.objectiveFunctionType == "GWalt":
             a = self.areas[area]
-            self.NRegion[newRegion] += a.data[0]
-            self.NRegion[oldRegion] -= a.data[0]
-            for index in range(1, len(a.data)):
-                self.data[newRegion][index - 1] += a.data[index] * a.data[0]
-            for index in range(1, len(a.data)):
-                self.data[oldRegion][index-1] -= a.data[index] * a.data[0]
+            lendata = len(a.data)
+            adata0 = a.data[0]
+            self.NRegion[newRegion] += adata0
+            self.NRegion[oldRegion] -= adata0
+            for index in range(1, lendata):
+                self.data[newRegion][index - 1] += a.data[index] * adata0
+                self.data[oldRegion][index - 1] -= a.data[index] * adata0
         if self.numRegionsType == "EndogenousThreshold":
             self.regionValue[newRegion] += self.areas[area].thresholdVar
             self.regionValue[oldRegion] -= self.areas[area].thresholdVar
