@@ -495,18 +495,18 @@ class RegionMaker:
         else:
             nr = self.feasibleRegions
         for regionID in nr:
-            setNeighsNoRegion = set([])
+            setNeighsNoRegion = set()
             try:
                 areas2Eval = self.region2Area[regionID]
             except:
                 areas2Eval = []
+
             for area in areas2Eval:
-                setNeighsNoRegion = setNeighsNoRegion | (set(self.areas[area].neighs) - set(areas2Eval))
-            for neigh in list(setNeighsNoRegion):
-                try:
-                    self.intraBorderingAreas[neigh]=self.intraBorderingAreas[neigh]|set([regionID])
-                except:
-                    self.intraBorderingAreas[neigh]=set([regionID])
+                setNeighsNoRegion.update(self.areas[area].neighs)
+            setNeighsNoRegion.difference_update(areas2Eval)
+
+            for neigh in setNeighsNoRegion:
+                self.intraBorderingAreas.setdefault(neigh, set()).add(regionID)
 
     def constructRegions(self, filteredCandidates=-99, filteredReg=-99):
         """
@@ -725,6 +725,9 @@ class RegionMaker:
         flag = 1
         newAdded = newRegion - set([seedArea])
         newNeighs = set([])
+
+        
+        
         while flag:
             for area in newAdded:
                 newNeighs = newNeighs | (((set(self.areas[area].neighs) & a2r) - aIDset) - newRegion)
@@ -1070,8 +1073,6 @@ class RegionMaker:
         while improve == 1:
             regions = range(0, self.pRegions)
             while len(regions) > 0:
-
-                #  step 3
                 if len(regions) > 1:
                     randomRegion = nprandom.randint(0, len(regions) - 1)
                 else:
@@ -1079,29 +1080,25 @@ class RegionMaker:
                 region = regions[randomRegion]
                 regions.remove(region)
 
-                # step 4
-
                 borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                 improve = 0
                 while len(borderingAreas) > 0:
-                    # step 5
-
                     randomArea = nprandom.randint(0, len(borderingAreas))
                     area = borderingAreas[randomArea]
                     borderingAreas.remove(area)
                     posibleMove = list(self.intraBorderingAreas[area])
+
                     if len(self.region2Area[region]) >= 2:
                         f = self.checkFeasibility(region, area, self.region2Area)
                     else:
                         f = 0
+
                     if f == 1:
                         for move in posibleMove:
-
-                            #  if len(region2AreaCopy[area2RegionCopy[area]]) > 1:
-
                             self.swapArea(area, move, self.region2Area, self.area2Region)
                             obj = self.recalcObj(self.region2Area)
                             self.swapArea(area, region, self.region2Area, self.area2Region)
+
                             if obj <= bestOBJ:
                                 self.moveArea(area, move)
                                 improve = 1
@@ -1112,10 +1109,6 @@ class RegionMaker:
                                 currentRegions = self.returnRegions()
                                 region2AreaBest = deepcopy(self.region2Area)
                                 area2RegionBest = deepcopy(self.area2Region)
-
-                                #  print "--- Local improvement (area, region)", area, move
-                                #  print "--- New Objective Function value: ", obj
-                                #  step 4
 
                                 borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                                 break
@@ -1128,10 +1121,6 @@ class RegionMaker:
                                     self.objInfo = obj
                                     currentOBJ = obj
                                     currentRegions = self.returnRegions()
-
-                                    #  print "--- NON-improving move (area, region)", area, move
-                                    #  print "--- New Objective Function value: ", obj
-                                    #  step 4
 
                                     borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                                     break
