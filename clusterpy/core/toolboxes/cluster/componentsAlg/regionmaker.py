@@ -102,11 +102,11 @@ class RegionMaker:
         self.potentialRegions4Area = {}
         self.intraBorderingAreas = {}
         self.candidateInfo = {}
-        self.externalNeighs = set([])
+        self.externalNeighs = set()
         self.alpha = alpha
         self.numRegionsType = numRegionsType
         self.neighSolutions = {(0,0): 9999}
-        self.regionMoves = set([])
+        self.regionMoves = set()
         self.distances = {}
         self.NRegion = []
         self.N = 0
@@ -415,7 +415,8 @@ class RegionMaker:
         setNeighs = set(neighs)
         setAssigned = set(self.assignedAreas)
         self.oldExternal = self.externalNeighs
-        self.externalNeighs = (self.externalNeighs | setNeighs) - setAssigned
+        self.externalNeighs.update(setNeighs)
+        self.externalNeighs.difference_update(setAssigned)
         self.newExternal = self.externalNeighs - self.oldExternal
         self.neighsMinusAssigned = setNeighs - setAssigned
 
@@ -426,10 +427,7 @@ class RegionMaker:
         """
         self.assignAreaStep1(areaID, regionID)
         for neigh in self.neighsMinusAssigned:
-            try:
-                self.potentialRegions4Area[neigh] = self.potentialRegions4Area[neigh]|set([regionID])
-            except:
-                self.potentialRegions4Area[neigh] = set([regionID])
+            self.potentialRegions4Area.setdefault(neigh, set()).add(regionID)
 
         try:
             self.potentialRegions4Area.pop(areaID)
@@ -462,10 +460,8 @@ class RegionMaker:
         self.addedArea = areaID
         self.assignAreaStep1(areaID, regionID)
         for neigh in self.neighsMinusAssigned:
-            try:
-                self.potentialRegions4Area[neigh] = self.potentialRegions4Area[neigh]|set([regionID])
-            except:
-                self.potentialRegions4Area[neigh] = set([regionID])
+            self.potentialRegions4Area.setdefault(neigh, set()).add(regionID)
+
         try:
             self.potentialRegions4Area.pop(areaID)
         except:
@@ -476,11 +472,11 @@ class RegionMaker:
         Returns bordering areas of a region
         """
         areas2Eval = self.region2Area[regionID]
-        borderingAreas = set([])
+        borderingAreas = set()
         for area in areas2Eval:
             try:
                 if len(self.intraBorderingAreas[area]) > 0:
-                    borderingAreas = borderingAreas | set([area])
+                    borderingAreas.add(area)
             except:
                 pass
         return borderingAreas
@@ -720,26 +716,39 @@ class RegionMaker:
         aIDset = set([areaID])
         areas2Eval.remove(areaID)
         seedArea = areas2Eval[0]
-        newRegion = (set([seedArea]) | set(self.areas[seedArea].neighs)) & set(areas2Eval)
+        newRegion = set()
+        newRegion.add(seedArea)
+        newRegion.update(self.areas[seedArea].neighs)
+        newRegion.intersection_update(areas2Eval)
         areas2Eval.remove(seedArea)
         flag = 1
-        newAdded = newRegion - set([seedArea])
-        newNeighs = set([])
+        newAdded = newRegion.copy()
+        newAdded.discard(seedArea)
+        newNeighs = set()
 
-        
-        
         while flag:
             for area in newAdded:
-                newNeighs = newNeighs | (((set(self.areas[area].neighs) & a2r) - aIDset) - newRegion)
+                newNeighs.update(self.areas[area].neighs)
                 areas2Eval.remove(area)
-            newNeighs = newNeighs - newAdded
-            newAdded = newNeighs
-            newRegion = newRegion | newAdded
+            newNeighs.intersection_update(a2r)
+            newNeighs.difference_update(aIDset, newRegion, newAdded)
+            newAdded = newNeighs.copy()
+            newRegion.update(newAdded)
+
+            ###
+            # for area in newAdded:
+            #     newNeighs = newNeighs | (((set(self.areas[area].neighs) & a2r) - aIDset) - newRegion)
+            #     areas2Eval.remove(area)
+            # newNeighs.difference_update(newAdded)
+            # newAdded = newNeighs
+            # newRegion.update(newAdded)
+            ###
+
             if len(areas2Eval) == 0:
                 feasible = 1
                 flag = 0
                 break
-            elif newNeighs == set([]) and len(areas2Eval) > 0:
+            elif newNeighs == set() and len(areas2Eval) > 0:
                 feasible = 0
                 flag = 0
                 break
