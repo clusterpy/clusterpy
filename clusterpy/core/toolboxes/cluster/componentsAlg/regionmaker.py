@@ -1069,6 +1069,7 @@ class RegionMaker:
         """
         Openshaw's Simulated Annealing for AZP algorithm
         """
+        return self.azpsa(alpha, temperature)
         totalMoves = 0
         acceptedMoves = 0
         bestOBJ = self.objInfo
@@ -1370,7 +1371,7 @@ class RegionMaker:
         try:
             for index in range(1, len(a.data)):
                 self.data[regionID][index - 1] += a.data[index] * a.data[0]
-            for index in range(1, len(a.data)):
+            #for index in range(1, len(a.data)):
                 self.data[oldRegion][index - 1] -= a.data[index] *a.data[0]
         except:
             pass
@@ -1406,3 +1407,98 @@ class RegionMaker:
         self.area2Region = extendedMemory.area2Region
         self.region2Area = extendedMemory.region2Area
         self.intraBorderingAreas = extendedMemory.intraBorderingAreas
+
+    def shapeprint(self):
+        print "****"
+        print nparray(self.returnRegions()).reshape(4, 4)
+        print self.intraBorderingAreas
+
+    def cn(self):
+        for area in self.intraBorderingAreas:
+            _tmp = set()
+            for neig in self.areas[area].neighs:
+                _tmp.add(self.area2Region[neig])
+
+            common_regions = _tmp.difference(self.intraBorderingAreas[area])
+            common_regions.discard(self.area2Region[area])
+            if len(common_regions):
+                boom()
+                print "bad bordering areas"
+
+        print "good borders"
+
+    def azpsa(self, alpha, temperature):
+        """ AZPSA """
+        improvement = True
+        # Step: 1
+        # Done in the regionmaker __init__ method
+        # Step: 2
+        regions = self.region2Area.keys()
+        #while improvement:
+        # Step: 3
+        while len(regions) > 0:
+            random_position = nprandom.choice(range(len(regions)))
+            region_k = regions[random_position]
+            del regions[random_position]
+            # Step: 4
+            region_k_areas = self.region2Area[region_k]
+            bordering_areas = set()
+            for area in region_k_areas:
+                bordering_areas.update(self.areas[area].neighs)
+            bordering_areas.difference_update(region_k_areas)
+            possible_moves = set()
+            improvement = False
+            for possible in bordering_areas:
+                # remove possible from region and check if it breaks
+                donor_region = self.area2Region[possible]
+                _donor_areas = list(self.region2Area[donor_region])
+                del _donor_areas[_donor_areas.index(possible)]
+                _donor_areaset = set(_donor_areas)
+                if len(_donor_areas) > 0:
+                    contiguos_areas = set([_donor_areas[0]])
+                    areas_eval = contiguos_areas.copy()
+                    while len(areas_eval) > 0:
+                        area = areas_eval.pop()
+                        region_neighs = _donor_areaset.intersection(self.areas[area].neighs)
+                        areas_eval.update(region_neighs.difference(contiguos_areas))
+                        contiguos_areas.update(region_neighs)
+
+                    region_islands = _donor_areaset.difference(contiguos_areas)
+                    if len(region_islands) == 0:
+                        possible_moves.add(possible)
+                    else:
+                        pass # leaves islands
+
+                else:
+                    pass # can not leave region without areas
+
+            # Step: 5
+            while len(possible_moves) > 0:
+                candidate = nprandom.choice(list(possible_moves))
+                possible_moves.discard(candidate)
+                donor_region = self.area2Region[candidate]
+
+                ################## danger zone  ##################
+                self.swapArea(candidate, region_k, self.region2Area, self.area2Region)
+                _tmp_obj_func = self.recalcObj(self.region2Area)
+                self.swapArea(candidate, donor_region, self.region2Area, self.area2Region)
+                ################## danger zone  ##################
+
+                if _tmp_obj_func <= self.objInfo:
+                    improvement = True
+                ################## danger zone  ##################
+                    self.moveArea(candidate, region_k)
+                ################## danger zone  ##################
+                    break
+                else:
+                    _random = float(nprandom.rand(1))
+                    _delta_f = -(_tmp_obj_func - self.objInfo)/ self.objInfo
+                    _boltzmann_value = npexp( _delta_f/temperature)
+                    # make move depending on the Boltzmann's equation result and break?
+                    if _random < _boltzmann_value:
+                ################## danger zone  ##################
+                        self.moveArea(candidate, region_k)
+                ################## danger zone  ##################
+                        break
+                    else:
+                        pass
