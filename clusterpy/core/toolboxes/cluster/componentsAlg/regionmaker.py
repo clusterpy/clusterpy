@@ -155,7 +155,7 @@ class RegionMaker:
                     lenUnassAreas = len(self.unassignedAreas)
                     while lenUnassAreas > 0:
                         self.constructRegions(filteredCandidates=self.unassignedAreas,
-                                filteredReg=i)
+                                              filteredReg=i)
                         lenUnassAreas = len(self.unassignedAreas)
                         c += 1
                 self.objInfo = self.getObj()
@@ -1104,9 +1104,10 @@ class RegionMaker:
 
                     if f == 1:
                         for move in posibleMove:
+                            _owner_region = self.area2Region[area]
                             self.swapArea(area, move, self.region2Area, self.area2Region)
                             obj = self.recalcObj(self.region2Area)
-                            self.swapArea(area, region, self.region2Area, self.area2Region)
+                            self.swapArea(area, _owner_region, self.region2Area, self.area2Region)
 
                             if obj <= bestOBJ:
                                 self.moveArea(area, move)
@@ -1118,8 +1119,7 @@ class RegionMaker:
                                 currentRegions = self.returnRegions()
                                 region2AreaBest = deepcopy(self.region2Area)
                                 area2RegionBest = deepcopy(self.area2Region)
-
-                                borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
+                                borderingAreas = list(self.returnBorderingAreas(region) & set(self.region2Area[region]))
                                 break
                             else:
                                 random = nprandom.rand(1)[0]
@@ -1131,11 +1131,12 @@ class RegionMaker:
                                     currentOBJ = obj
                                     currentRegions = self.returnRegions()
 
-                                    borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
+                                    borderingAreas = list(self.returnBorderingAreas(region) & set(self.region2Area[region]))
                                     break
+
         self.objInfo = bestOBJ
-        self.region2Area = deepcopy(region2AreaBest)
-        self.area2Region = deepcopy(area2RegionBest)
+        self.region2Area = region2AreaBest
+        self.area2Region = area2RegionBest
 
     def AZPTabuMove(self, tabuLength=5, convTabu=5):
         """
@@ -1379,7 +1380,7 @@ class RegionMaker:
             areasInNow = [self.areas[aID] for aID in areasIdsIn]
             areasInRegion = set(areasIdsIn)
             aNeighs = set(self.areas[area].neighs)
-            neighsInOther = aNeighs - areasInRegion
+            neighsInOther = aNeighs - areasInRegion # neighs of this area in other regions
             if len(neighsInOther) == 0 and area in self.intraBorderingAreas:
                 self.intraBorderingAreas.pop(area)
             else:
@@ -1389,6 +1390,12 @@ class RegionMaker:
                 if area in self.intraBorderingAreas:
                     self.intraBorderingAreas.pop(area)
                 self.intraBorderingAreas[area] = borderRegions
+                #_tmp = set()
+                #for neig in self.areas[area].neighs:
+                #    _tmp.add(self.area2Region[neig])
+
+                #_tmp.discard(self.area2Region[area])
+                #self.intraBorderingAreas[area] = _tmp
         self.calcObj()
 
     def recoverFromExtendedMemory(self, extendedMemory):
