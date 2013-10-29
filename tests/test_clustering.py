@@ -135,9 +135,9 @@ class TestAZPalgorithms(TestCase):
     def test_azpsa_never_breaks_contiguity(self):
         instance = self.map_instance
 
-#        make_static_random(_seed)
-#        instance = clusterpy.createGrid(4, 4)
-#        instance.generateData("SAR", "rook", 1, 0.7)
+        make_static_random(_seed)
+        instance = clusterpy.createGrid(4, 4)
+        instance.generateData("SAR", "rook", 1, 0.7)
 
         instance.cluster('azpSa',
                          ['SAR1'],
