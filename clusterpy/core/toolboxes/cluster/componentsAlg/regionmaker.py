@@ -1143,10 +1143,10 @@ class RegionMaker:
                                     #  step 4
                                     borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                                     break
-
         self.objInfo = bestOBJ
-        self.region2Area = region2AreaBest
-        self.area2Region = area2RegionBest
+        self.region2Area = deepcopy(region2AreaBest)
+        self.area2Region = deepcopy(area2RegionBest)
+        self.getIntraBorderingAreas()
 
     def AZPTabuMove(self, tabuLength=5, convTabu=5):
         """
