@@ -27,7 +27,7 @@ else:
         pass
         print "Irregular maps creator is not available because scipy is not installed"
     else:
-        from toolboxes import rimaps as rim
+        from toolboxes import rimap as rim
 
 
 # INDEX
