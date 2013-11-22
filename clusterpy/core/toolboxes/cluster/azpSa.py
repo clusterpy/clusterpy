@@ -111,8 +111,6 @@ def execAZPSA(y, w, pRegions, initialSolution=[], maxit=1):
 
     #  CONSTRUCTION
 
-    randomInits = 1
-
     rm = RegionMaker(am, pRegions,
                     initialSolution=initialSolution,
                     distanceType=distanceType,
