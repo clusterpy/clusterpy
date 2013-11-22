@@ -9,6 +9,8 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
+from copy import deepcopy
+
 class BasicMemory:
     """
     Keeps the minimum amount of information about a given solution. It keeps the
@@ -66,7 +68,7 @@ class ExtendedMemory(BasicMemory):
         Updates ExtendedMemory when a solution is modified.
         """
         BasicMemory.updateBasicMemory(self, rm)
-        self.area2Region = rm.area2Region
-        self.region2Area = rm.region2Area
-        self.intraBorderingAreas = rm.intraBorderingAreas
+        self.area2Region = deepcopy(rm.area2Region)
+        self.region2Area = deepcopy(rm.region2Area)
+        self.intraBorderingAreas = deepcopy(rm.intraBorderingAreas)
 

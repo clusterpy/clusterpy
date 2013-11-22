@@ -68,7 +68,7 @@ class TestArisel(TestCase):
 
         final_obj_func = _final_objfunction_from_instance(instance)
 
-        assert initial_obj_func >= final_obj_func
+        assert initial_obj_func > final_obj_func
 
 class TestMaxPTabu(TestCase):
     def setUp(self):
@@ -104,7 +104,7 @@ class TestMaxPTabu(TestCase):
 
         final_obj_func = _final_objfunction_from_instance(instance)
 
-        assert initial_obj_func >= final_obj_func
+        assert initial_obj_func > final_obj_func
 
 class TestAZPalgorithms(TestCase):
     """ Tests for AZP, AZPrTabu, AZPSA """
@@ -139,7 +139,7 @@ class TestAZPalgorithms(TestCase):
 
         self.assertTrue(ob_before > ob_after)
 
-    @attr('slow', 'azpsa')
+    @attr('slow')
     def test_azpsa_never_breaks_contiguity(self):
         instance = self.map_instance
 
@@ -156,19 +156,19 @@ class TestAZPalgorithms(TestCase):
 
         self.assertTrue(feasible)
 
-    @skip
-    @attr('slow')
+    @attr('slow', 'azpsa')
     def test_azpsa_gives_at_least_same_obj_func(self):
         instance = self.map_instance
         aream = AreaManager(instance.Wrook, instance.Y)
         rm = RegionMaker(aream, into_regions)
 
-        temperature = 100
+        alpha = 0.85
+        maxiterations = 3
 
         ob_before = rm.objInfo
-        rm.AZPSA(temperature)
+        rm.AZPSA(alpha, maxiterations)
         ob_after = rm.objInfo
-
+        print ob_before, ob_after
         self.assertTrue(ob_before > ob_after)
 
     @attr('slow')
