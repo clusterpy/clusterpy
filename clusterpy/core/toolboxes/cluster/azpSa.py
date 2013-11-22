@@ -11,7 +11,6 @@ __email__ = "contacto@rise-group.org"
 import numpy
 import time as tm
 from componentsAlg import AreaManager
-from componentsAlg import BasicMemory
 from componentsAlg import RegionMaker
 
 __all__ = ['execAZPSA']
@@ -109,8 +108,6 @@ def execAZPSA(y, w, pRegions, initialSolution=[], maxit=1):
     alpha = 0.85
     am = AreaManager(w, y, distanceType)
     start = tm.time()
-    basicMemory = BasicMemory()
-    localBasicMemory = BasicMemory()
 
     #  CONSTRUCTION
 
@@ -126,40 +123,11 @@ def execAZPSA(y, w, pRegions, initialSolution=[], maxit=1):
     print "initial O.F: ", rm.objInfo
 
     #  LOCAL SEARCH
-    #  step a
-
-    T = 1
-    k = 0
-    while k < 3:
-        improved = 0
-        for i in range(maxit):
-            localBasicMemory.updateBasicMemory(rm)
-
-            #  step b: modified step 5
-
-            rm.AZPSA(alpha, T)
-            if rm.objInfo < localBasicMemory.objInfo:
-                improved = 1
-            if rm.objInfo < basicMemory.objInfo:
-
-                #  print "Best solution so far: ", rm.returnRegions()
-                #  print "Best O.F. so far: ", rm.objInfo
-                
-                basicMemory.updateBasicMemory(rm)
-
-        #  step c
-
-        T *= alpha
-        if improved == 1:
-            k = 0
-        else:
-            k += 1
-
-        #  step d: repeat b and c
+    rm.AZPSA(alpha, maxit)
 
     time = tm.time() - start
-    Sol = basicMemory.regions
-    Of = basicMemory.objInfo
+    Sol = rm.returnRegions()
+    Of = rm.objInfo
     print "FINAL SOLUTION: ", Sol
     print "FINAL OF: ", Of
     output = { "objectiveFunction": Of,

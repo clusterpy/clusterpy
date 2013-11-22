@@ -16,6 +16,7 @@ from numpy import sort as npsort, zeros as npzeros
 from objFunctions import makeObjDict, objectiveFunctionTypeDispatcher
 from selectionTypeFunctions import selectionTypeDispatcher
 
+from memory import ExtendedMemory as ExtMem
 from areacl import AreaCl
 from helperfunctions import sortedKeys
 from os import getpid
@@ -1065,9 +1066,32 @@ class RegionMaker:
                                 borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                                 break
 
-    def AZPSA(self, alpha, temperature):
+    def AZPSA(self, alpha = 0.85, maxit = 2):
+        """ Openshaw's Simulated Annealing for AZP algorithm
         """
-        Openshaw's Simulated Annealing for AZP algorithm
+        basicMemory = ExtMem()
+        localBasicMemory = ExtMem()
+        T = 1
+        k = 0
+        while k < 3:
+            improved = 0
+            for i in range(maxit):
+                localBasicMemory.updateExtendedMemory(self)
+                self.modified_azp_for_sa(alpha, T)
+                if self.objInfo < localBasicMemory.objInfo:
+                    improved = 1
+                if self.objInfo < basicMemory.objInfo:
+                    basicMemory.updateExtendedMemory(self)
+            T *= alpha
+            if improved == 1:
+                k = 0
+            else:
+                k += 1
+        self.recoverFromExtendedMemory(basicMemory)
+
+    def modified_azp_for_sa(self, alpha, temperature):
+        """
+        Openshaw's modified step #5 for AZP-SA algorithm
         """
         totalMoves = 0
         acceptedMoves = 0
