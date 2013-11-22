@@ -66,8 +66,8 @@ def execMaxpTabu(y, w, threshold=100.0, maxit=2, tabuLength=5, typeTabu="exact")
     >>> X[variableName1] = [function1, function2,....]
     >>> X[variableName2] = [function1, function2,....]
 
-    Where functions are strings which represents the name of the 
-    functions to be used on the given variableName. Functions 
+    Where functions are strings which represents the name of the
+    functions to be used on the given variableName. Functions
     could be,'sum','mean','min','max','meanDesv','stdDesv','med',
     'mode','range','first','last','numberOfAreas. By deffault just
     ID variable is added to the dissolved map.
@@ -81,7 +81,7 @@ def execMaxpTabu(y, w, threshold=100.0, maxit=2, tabuLength=5, typeTabu="exact")
     objectiveFunctionType = "SS";
     selectionType = "Minimum";
     numRegionsType = "EndogenousThreshold";
-    
+
     #  CONSTRUCTION PHASE 1: GROWING FEASIBLE REGIONS
 
     start = tm.time()
@@ -114,7 +114,7 @@ def execMaxpTabu(y, w, threshold=100.0, maxit=2, tabuLength=5, typeTabu="exact")
             maxP = numRegions
             obj = rm.objInfo
             bestCandidates[obj] = rm.feasibleRegions
-        if numRegions == maxP: 
+        if numRegions == maxP:
             obj = rm.objInfo
             if obj in bestCandidates:
                 pass
@@ -124,7 +124,7 @@ def execMaxpTabu(y, w, threshold=100.0, maxit=2, tabuLength=5, typeTabu="exact")
             pass
 
     #   print "bestCandidates", bestCandidates
-    
+
     ofValues = bestCandidates.keys()
     basicMemory = BasicMemory()
     while len(ofValues) >= 1:
@@ -142,13 +142,13 @@ def execMaxpTabu(y, w, threshold=100.0, maxit=2, tabuLength=5, typeTabu="exact")
         regionId = 0
         for growReg in partialSolution:
             seedGrowReg = partialSolution[growReg][0]
-            rm.assignSeeds(seedGrowReg, regionId) 
+            rm.assignSeeds(seedGrowReg, regionId)
             partialSolution[growReg].remove(seedGrowReg)
             if len(partialSolution[growReg]) >= 1:
                 for areaInGrow in partialSolution[growReg]:
                     rm.assignArea(areaInGrow, regionId)
             regionId += 1
-            
+
         # CONSTRUCTION PHASE 2: ENCLAVES ASSIGNATION
 
         rm.feasibleRegions = copy.deepcopy(rm.region2Area)
@@ -164,14 +164,14 @@ def execMaxpTabu(y, w, threshold=100.0, maxit=2, tabuLength=5, typeTabu="exact")
 
         #  print "ASSIGNED SOLUTION"
         #  print "OBJ: ", rm.getObjective(rm.region2Area), rm.returnRegions()
-        
+
         rm.calculateRegionValueThreshold()
 
         #  LOCAL SEARCH
 
         rm.calcObj()
         convTabu = max(10,len(y)/maxP)  #   convTabu=230*numpy.sqrt(maxP)
-        
+
         #  print "###ENTERING TABU",rm.objInfo,rm.returnRegions()
 
         rm.tabuMove(tabuLength, convTabu = convTabu, typeTabu=typeTabu)
@@ -195,7 +195,7 @@ def execMaxpTabu(y, w, threshold=100.0, maxit=2, tabuLength=5, typeTabu="exact")
         "distanceType": distanceType,
         "distanceStat": distanceStat,
         "selectionType": selectionType,
-        "ObjectiveFuncionType": objectiveFunctionType} 
+        "ObjectiveFuncionType": objectiveFunctionType}
     print "Done"
     return output
 
