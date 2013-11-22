@@ -68,7 +68,7 @@ class TestArisel(TestCase):
 
         final_obj_func = _final_objfunction_from_instance(instance)
 
-        assert initial_obj_func > final_obj_func
+        self.assertTrue(initial_obj_func >= final_obj_func)
 
 class TestMaxPTabu(TestCase):
     def setUp(self):
@@ -104,7 +104,7 @@ class TestMaxPTabu(TestCase):
 
         final_obj_func = _final_objfunction_from_instance(instance)
 
-        assert initial_obj_func > final_obj_func
+        self.assertTrue(initial_obj_func >= final_obj_func)
 
 class TestAZPalgorithms(TestCase):
     """ Tests for AZP, AZPrTabu, AZPSA """
@@ -137,15 +137,11 @@ class TestAZPalgorithms(TestCase):
         rm.AZPImproving()
         ob_after = rm.objInfo
 
-        self.assertTrue(ob_before > ob_after)
+        self.assertTrue(ob_before >= ob_after)
 
-    @attr('slow')
+    @attr('slow', 'azpsa')
     def test_azpsa_never_breaks_contiguity(self):
         instance = self.map_instance
-
-        make_static_random(_seed)
-        instance = clusterpy.createGrid(4, 4)
-        instance.generateData("SAR", "rook", 1, 0.7)
 
         instance.cluster('azpSa',
                          ['SAR1'],
@@ -159,6 +155,7 @@ class TestAZPalgorithms(TestCase):
     @attr('slow', 'azpsa')
     def test_azpsa_gives_at_least_same_obj_func(self):
         instance = self.map_instance
+
         aream = AreaManager(instance.Wrook, instance.Y)
         rm = RegionMaker(aream, into_regions)
 
@@ -168,8 +165,7 @@ class TestAZPalgorithms(TestCase):
         ob_before = rm.objInfo
         rm.AZPSA(alpha, maxiterations)
         ob_after = rm.objInfo
-        print ob_before, ob_after
-        self.assertTrue(ob_before > ob_after)
+        self.assertTrue(ob_before >= ob_after)
 
     @attr('slow')
     def test_azptabu_never_breaks_contiguity(self):
@@ -197,7 +193,7 @@ class TestAZPalgorithms(TestCase):
         rm.AZPTabuMove(tabuLength=tabuLength, convTabu=convTabu)
         ob_after = rm.objInfo
 
-        self.assertTrue(ob_before > ob_after)
+        self.assertTrue(ob_before >= ob_after)
 
     @attr('slow')
     def test_azprtabu_never_breaks_contiguity(self):
@@ -224,5 +220,5 @@ class TestAZPalgorithms(TestCase):
         rm.reactiveTabuMove(convTabu)
         ob_after = rm.objInfo
 
-        self.assertTrue(ob_before > ob_after)
+        self.assertTrue(ob_before >= ob_after)
 
