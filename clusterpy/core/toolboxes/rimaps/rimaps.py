@@ -77,7 +77,7 @@ class rimap():
             sa,sr = scalePolygon(sa,sr,1000)
             polygon = polarPolygon2cartesian(zip(sa,sr))
         else:
-            layer = clusterpy.importArcData(boundary)
+            layer = boundary
             polygon = layer.areas[0][0]
         polygon = Polygon(polygon)
         self.areasPerLevel = {}
