@@ -29,18 +29,18 @@ def generateSpots(w, nc=4, compact=0.9, Zalpha=2.1):
     **Example** 
 
     Generating a float Spot process on China each with 4 clusters,
-    and compactness level of 0.7 and an alpha value of 0.9
+    and compactness level of 0.7 and an Zalpha value of 1.28(alpha=0.9)
 
     >>> import clusterpy
     >>> china = clusterpy.importArcData("clusterpy/data_examples/china")
-    >>> china.generateData("Spots", 'queen', 1, 4, 0.7, 0.9)
+    >>> china.generateData("Spots", 'queen', 1, 4, 0.7, 1.28)
 
     Generating an integer Spot process on China each with 4 clusters,
-    and compactness level of 0.7 and an alpha value of 0.9
+    and compactness level of 0.7 and an alpha value of 1.28(alpha=0.9)
 
     >>> import clusterpy
     >>> china = clusterpy.importArcData("clusterpy/data_examples/china")
-    >>> china.generateData("Spots", 'queen', 1, 4, 0.7, 0.9, integer=1)
+    >>> china.generateData("Spots", 'queen', 1, 4, 0.7, 1.28, integer=1)
     """
     y = {}
     N = len(w.keys())

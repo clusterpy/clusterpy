@@ -12,7 +12,6 @@ __all__ = ['shpWriterDis', 'dbfWriter', 'csvWriter']
 import struct 
 from datetime import datetime
 import itertools
-from componentsIO import *
 # shpWriterDis
 # shpWriter
 # shpWriter2
@@ -86,9 +85,10 @@ def shpWriter(areas, fileName, type=1):
             Xmax = 0
             Ymax = 0
         numParts = len(ar)
-        areaValues = struct.pack('<i', type) + struct.pack('<d', Xmin) + struct.pack('<d',
-                    Ymin) + struct.pack('<d', Xmax) + struct.pack('<d', Ymax) + struct.pack('<i',
-                    numParts) + struct.pack('<i', numPoints) + parts  + puntos
+        # areaValues = struct.pack('<i', type) + struct.pack('<d', Xmin) + struct.pack('<d',
+        #             Ymin) + struct.pack('<d', Xmax) + struct.pack('<d', Ymax) + struct.pack('<i',
+        #             numParts) + struct.pack('<i', numPoints) + parts  + puntos
+        areaValues = struct.pack('<i', type) + puntos
         varLength = (len(areaValues)/2)
         contentLength = struct.pack('>l', varLength)
         shxOffset = shxOffset + oldOffset

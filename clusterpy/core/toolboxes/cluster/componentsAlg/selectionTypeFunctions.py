@@ -9,24 +9,50 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-import numpy
+from numpy import random as nprandom
+from random import randint
 
 def minimumSelection(RegionMaker):
     """
     Select and assign the nearest area to a region
     """
+    nInd = 0
+    minIndex = 0
+    idx = 0
+    it = 0 #iterator
+    rid = 0
+    aid = 0
+    val = 0.0
+    minVal = 0.0
+    values = []
+    indicesMin = []
     keys = RegionMaker.candidateInfo.keys()
-    if len(keys) != 0:
-        values = [ RegionMaker.candidateInfo[i] for i in keys ]
-        minVal = min(values)
+
+    if keys:
+        #values = [ RegionMaker.candidateInfo[i] for i in keys ]
+        #minVal = min(values)
         # random selection for ties
-        indicesMin = indexMultiple(values, minVal)
-        nInd = len(indicesMin)
-        idx=range(nInd)
-        numpy.random.shuffle(idx)
-        minIndex = indicesMin[idx[0]]
-        aid,rid = keys[minIndex]
-        [RegionMaker.candidateInfo.pop(key) for key in keys if key[0] == aid]
+        #indicesMin = [ l[0] for l in enumerate(values) if l[1] == minVal ]
+        indicesMin = []
+        minVal =  float('Inf')   
+        for it, key in enumerate(keys):
+            val = RegionMaker.candidateInfo[key]
+            if val < minVal:
+                minVal = val
+                indicesMin = [it]
+                nInd = 1
+            elif val == minVal:
+                indicesMin.append(it)
+                nInd += 1
+        
+        idx = randint(0, nInd - 1)
+        minIndex = indicesMin[idx]
+        aid = keys[minIndex][0]
+        rid = keys[minIndex][1]
+
+        for key in keys:
+            if key[0] == aid:
+                RegionMaker.candidateInfo.pop(key)
         RegionMaker.assignArea(aid, rid)
 
 def fullRandom(RegionMaker):
@@ -36,7 +62,7 @@ def fullRandom(RegionMaker):
     keys = RegionMaker.candidateInfo.keys() 
     values = [ RegionMaker.candidateInfo[i] for i in keys ]
     if len(values) > 0:
-        randomIndex = numpy.random.randint(0, len(values))
+        randomIndex = nprandom.randint(0, len(values))
         aid,rid = keys[randomIndex]
         [RegionMaker.candidateInfo.pop(key) for key in keys if key[0] == aid]
         RegionMaker.assignArea(aid, rid)
@@ -53,3 +79,4 @@ def indexMultiple(x,value):
 selectionTypeDispatcher = {}
 selectionTypeDispatcher["Minimum"] = minimumSelection
 selectionTypeDispatcher["FullRandom"] = fullRandom
+

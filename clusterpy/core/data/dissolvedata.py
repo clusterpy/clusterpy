@@ -45,7 +45,7 @@ def dissolveData(fieldnames, Y, region, X):
     j = 0
     count = 0
     fields = [] 
-    for i in range(2, len(fieldnames)):
+    for i in range(0, len(fieldnames)):
         if X.has_key(fieldnames[i]):
             fields.append(i)
     i = 0

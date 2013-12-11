@@ -1,4 +1,5 @@
 from distutils.core import setup
+from distutils.extension import Extension
 
 setup(
         name='clusterPy',
@@ -10,7 +11,7 @@ setup(
         author_email='software@rise-group.org',
         url='http://www.rise-group.org/section/Software/clusterPy/',
         packages=['clusterpy','clusterpy.core','clusterpy.core.data',
-            'clusterpy.core.geometry','clusterpy.core.toolboxes',
-            'clusterpy.core.toolboxes.cluster',
-            'clusterpy.core.toolboxes.cluster.componentsAlg']
-    )
+                  'clusterpy.core.geometry','clusterpy.core.toolboxes',
+                  'clusterpy.core.toolboxes.cluster',
+                  'clusterpy.core.toolboxes.cluster.componentsAlg'],
+        )
