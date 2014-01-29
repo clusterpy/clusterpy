@@ -91,7 +91,7 @@ def getObjectiveFunctionClique(regionMaker, *args):
                 if iti < itj:
                     areaid = region[itj]
                     areaj = np.array(regionMaker.areas[areaid].data)
-                    distmatrix[iti][itj] = np.linalg.norm(areai - areaj) ** 2
+                    distmatrix[iti][itj] = np.linalg.norm(areai - areaj)
 
         ofuncval += distmatrix.sum()
     return ofuncval
