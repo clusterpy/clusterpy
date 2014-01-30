@@ -199,43 +199,41 @@ lay = clusterpy.importArcData("HCinstances/hc25-"+str(rho)+"-"+str(inst))
 			
 # except GurobiError:
 	# print 'Error reported'
+
+lay.cluster('azpTabu', ['SAR1'], p)	
+
+# n=25
+# numA = range(n)
+
+# heu=[]
+# for iter in range(100):
+
+	# lay.cluster('azpTabu', ['SAR1'], p)
+	# azpTexp=lay.fieldNames[-1]
+	# output=lay.outputCluster[azpTexp]
+	# sol = output["r2a"]
+
+	# t={(i,j):0 for i in numA for j in numA if i<j}
+	# num = list(numA)
+	# while num:
+		# i = num[0]
+		# f = num.remove(i)
+		# for j in range(i+1,n):
+			# if sol[i]==sol[j]: #same region
+				# t[i,j] = 1
 	
+	# result = {'OF':output['objectiveFunction'],'t':t,'time':output["runningTime"],'sol':sol}
+	# heu.append(result)
 
-n=25
-numA = range(n)
+# heuSort = sorted(heu, key=lambda k: k['OF'])
 
-heu=[]
-for iter in range(30):
+# f = open ("AZPtabuExp-"+str(p)+"-"+str(rho)+"-"+str(inst)+".txt", "w")
+# for j in range(len(heuSort)):	
+	# f.write(str(heuSort[j])+'\n')
+# f.close()
 
-	lay.cluster('azpTabu', ['SAR1'], p)
-	azpTexp=lay.fieldNames[-1]
-	output=lay.outputCluster[azpTexp]
-	sol = output["r2a"]
 
-	t={(i,j):0 for i in numA for j in numA if i<j}
-	num = list(numA)
-	while num:
-		i = num[0]
-		f = num.remove(i)
-		for j in range(i+1,n):
-			if sol[i]==sol[j]: #same region
-				t[i,j] = 1
-	
-	result = {'OF':output['objectiveFunction'],'t':t,'time':output["runningTime"],'sol':sol}
-	heu.append(result)
-
-heuSort = sorted(heu, key=lambda k: k['OF'])
-
-f = open ("AZPtabuExp.txt", "w")
-for j in range(len(heuSort)):	
-	f.write(str(heuSort[j])+'\n')
-f.close()
-
-#volver un string como un diccionario: http://stackoverflow.com/questions/988228/converting-a-string-to-dictionary
+# #volver un string como un diccionario: http://stackoverflow.com/questions/988228/converting-a-string-to-dictionary
 # import ast
 # ast.literal_eval("{'muffin' : 'lolz', 'foo' : 'kitty'}")
 
-#import pdb; pdb.set_trace()
-
-# sorted(d.items(), key=itemgetter(1))
-# print t, len(t)
