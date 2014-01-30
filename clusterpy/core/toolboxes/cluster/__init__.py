@@ -11,7 +11,7 @@ __email__ = "contacto@rise-group.org"
 #cambiar all
 __all__ = ['execAZP','execArisel','execAZPRTabu','execAZPSA','execAZPTabu', \
            'execPregionsExact','execPregionsExactCP','execMaxpTabu', 'execRandom', \
-           'execAMOEBA','originalSOM','geoSom']
+           'execMinpOrder','execMinpFlow','execAMOEBA','originalSOM','geoSom']
 
 from amoeba import execAMOEBA
 from arisel import execArisel
@@ -23,6 +23,7 @@ from geoSOM import geoSom
 from pRegionsExact import execPregionsExact
 from pRegionsExactCP import execPregionsExactCP
 from maxpTabu import execMaxpTabu
-#from maxpExact import execMaxpExact
+from minpOrder import execMinpOrder
+from minpFlow import execMinpFlow
 from random import execRandom
 from som import originalSOM

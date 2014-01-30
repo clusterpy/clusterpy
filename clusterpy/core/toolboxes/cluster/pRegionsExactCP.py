@@ -18,14 +18,13 @@ __email__ = "contacto@rise-group.org"
 import numpy as nm
 from gurobipy import *
 import time as tm
-import random
 from toolboxes.cluster.componentsAlg.distanceFunctions import distanceA2AEuclideanSquared
 
 
 __all__ = ['execPregionsExactCP']
 
 
-def execPregionsExactCP(y, w, p=2):
+def execPregionsExactCP(y, w, p=2,rho='none', inst='none', conseq='none'):
 
     #EXPLICAR QUÉ ES EL P-REGIONS
     """P-regions model
@@ -216,23 +215,31 @@ def execPregionsExactCP(y, w, p=2):
 						if em!=j:
 							m.addConstr(t[i][j]+t[i][em]-t[j][em]<=1-tol,"c3_"+str([i,j,em]))
 							
+		# Constraint REDUNDANTE
+		for i in numA:
+			for j in numA:
+				if i!=j:	
+					m.addConstr(x[i][j]+x[j][i]<=1,"c3_"+str([i,j,em]))
+		
+		
 		
 		m.update()
 
 		#Writes the .lp file format of the model
 		#m.write("test.lp")
 		
-		
 		#To reduce memory use
-		m.setParam('Nodefilestart',0.001)
+		#m.setParam('Threads',1)
+		#m.setParam('NodefileStart',0.1)
 		# To disable optimization output
 		#m.setParam('OutputFlag',False)
 		#m.setParam('ScaleFlag',0)
 		# To set the tolerance to non-integer solutions
 		m.setParam('IntFeasTol', tol)
+		m.setParam('LogFile', 'CP-'+str(conseq)+'-'+str(n)+'-'+str(p)+'-'+str(rho)+'-'+str(inst))
 		# To enable lazy constraints
 		m.params.LazyConstraints = 1
-		m.params.timeLimit = 600
+		m.params.timeLimit = 1800
 		#m.params.ResultFile= "resultados.sol"
 		m.optimize(subtourelim)
 					
@@ -244,23 +251,19 @@ def execPregionsExactCP(y, w, p=2):
 				# print v.varName, v.x
 		
 		#import pdb; pdb.set_trace()
-		sol = [0 for k in numA]
-		num = list(numA)
-		regID=0 #Number of region
-		while num:
-			area = num[0]
-			sol[area]=regID
-			f = num.remove(area)
-			for j in numA:
-				if t[area][j].x>=1-tol:#==1:
-					sol[j] = regID
-					if num.count(j)!=0:
-						b = num.remove(j)
-			regID += 1
-			
-		f = open("results.txt","a")
-		f.write(str(m.objBound)+"  "+str(m.objVal)+"  "+str(time)+" "+str(sol)+" \n")
-		f.close()
+		# sol = [0 for k in numA]
+		# num = list(numA)
+		# regID=0 #Number of region
+		# while num:
+			# area = num[0]
+			# sol[area]=regID
+			# f = num.remove(area)
+			# for j in numA:
+				# if t[area][j].x>=1-tol:#==1:
+					# sol[j] = regID
+					# if num.count(j)!=0:
+						# b = num.remove(j)
+			# regID += 1
 					
 		# print 'FINAL SOLUTION:', sol
 		# print 'FINAL OF:', m.objVal
@@ -269,10 +272,11 @@ def execPregionsExactCP(y, w, p=2):
 		# print "running time", time
 		# print "running timeGR", m.Runtime
 		output = { "objectiveFunction": m.objVal,
+			"bestBound": m.objBound,
 			"running time": time,
-			"algorithm": "pRegionsExact",
-			"regions" : len(sol),
-			"r2a": sol,
+			"algorithm": "pRegionsExactCP",
+			#"regions" : len(sol),
+			"r2a": "None",#sol,
 			"distanceType" :  "EuclideanSquared",
 			"distanceStat" : "None",
 			"selectionType" : "None",

@@ -45,7 +45,8 @@ from toolboxes import execAZPSA
 from toolboxes import execAZPTabu
 from toolboxes.cluster.pRegionsExact import execPregionsExact
 from toolboxes.cluster.pRegionsExactCP import execPregionsExactCP
-#from toolboxes.cluster.maxpExact import execMaxpExact
+from toolboxes.cluster.minpOrder import execMinpOrder
+from toolboxes.cluster.minpFlow import execMinpFlow
 from toolboxes import execMaxpTabu
 from toolboxes import execAMOEBA
 from toolboxes import originalSOM
@@ -1199,7 +1200,6 @@ Name followed by = signal followed by the fieldOperations")
             print "The parameters ""dissolve"" and ""dataOperations"" is not available for the this \
 algorithm" 
 
-        #import pdb; pdb.set_trace()
         if algorithm == "geoSom":
             fieldNames = tuple(args[2])
             args = (self, fieldNames) + args[3:]
@@ -1213,7 +1213,7 @@ algorithm"
                     std_value = numpy.std(values)
                     newVar = fieldOperation("( " + name + " - " + str(mean_value) + ")/float(" + str(std_value) + ")", algorithmY, fieldNames)
                     for nv,val in enumerate(newVar):
-                        algorithmY[nv][nn] = val
+						algorithmY[nv][nn] = val
                 # Adding original population to de algortihmY
                 if algorithm == "maxpTabu":
                     population = fieldNames[-1]
@@ -1234,7 +1234,9 @@ algorithm"
             "geoSom": lambda *args, **kargs: geoSom(*args, **kargs),
             "pRegionsExact": lambda *args, **kargs: execPregionsExact(*args, **kargs),
 			"pRegionsExactCP": lambda *args, **kargs: execPregionsExactCP(*args, **kargs),
-            "maxpTabu": lambda *args, **kargs: execMaxpTabu(*args, **kargs)
+            "minpOrder": lambda *args, **kargs: execMinpOrder(*args, **kargs),
+            "minpFlow": lambda *args, **kargs: execMinpFlow(*args, **kargs),
+			"maxpTabu": lambda *args, **kargs: execMaxpTabu(*args, **kargs)
         }[algorithm](*args, **kargs)
         self.outputCluster[name]["weightType"] = wType
         self.outputCluster[name]["aggregationVariables"] = fieldNames 

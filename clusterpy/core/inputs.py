@@ -29,8 +29,6 @@ else:
     else:
         from toolboxes import rimap as rim
 
-
-
 # INDEX
 # new
 # load
@@ -77,7 +75,7 @@ def rimap(n,N=30,alpha=[0.01,0.3],sigma=[1.1,1.4],dt=0.1,pg=0.01,pu=0.05,su=0.31
             lay.exportArcData("rimap_1000")
     """
 
-    rm = rim(n,N,alpha,sigma,dt,pg,pu,su,boundary)
+    rm = rim.rimap(n,N,alpha,sigma,dt,pg,pu,su,boundary)
     areas = rm.carteAreas
     areas = fixIntersections(areas)
     Wqueen,Wrook, = weightsFromAreas(areas)
