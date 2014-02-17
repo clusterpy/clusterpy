@@ -15,6 +15,8 @@ from numpy import ones as npones, power as nppower, random as nprandom
 from numpy import sort as npsort, zeros as npzeros
 from objFunctions import makeObjDict, objectiveFunctionTypeDispatcher
 from selectionTypeFunctions import selectionTypeDispatcher
+from warnings import warn
+from time import time
 
 from memory import ExtendedMemory as ExtMem
 from areacl import AreaCl
@@ -278,8 +280,8 @@ class RegionMaker:
         probabilities = map(lambda x: x / float(total), distances)
         seeds = []
         localDistanceType = self.distanceType
-        localreturnDistance2Area = AreaCl.returnDistance2Area
-        nprandom.seed(getpid())
+        returnDistance2Area = AreaCl.returnDistance2Area
+        nprandom.seed(int(time() * getpid()))
         for k in xrange(self.pRegions):
             random = nprandom.uniform(0, 1)
             find = False
@@ -305,9 +307,9 @@ class RegionMaker:
                                 k = (0,0)
                             cached = cachedDistances.get(k, -1)
                             if cached < 0:
-                                newDist = localreturnDistance2Area(currentArea,
-                                                                   selfAmAreas[x],
-                                                                   distanceType = localDistanceType)
+                                newDist = returnDistance2Area(currentArea,
+                                                               selfAmAreas[x],
+                                                               distanceType = localDistanceType)
                                 tempMap.append(newDist)
                                 cachedDistances[k] = newDist
 
@@ -320,6 +322,7 @@ class RegionMaker:
                 else:
                     cont += 1
                     acum = sup
+        del cachedDistances
         return seeds
 
     def extractThresholdVar(self):
