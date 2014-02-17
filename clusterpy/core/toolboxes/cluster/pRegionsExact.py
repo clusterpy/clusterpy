@@ -16,8 +16,10 @@ __email__ = "contacto@rise-group.org"
 #from componentsAlg import RegionMaker
 
 import numpy as nm
-
-from gurobipy import *
+try:
+    from gurobipy import *
+except ImportError:
+    pass
 import time as tm
 from toolboxes.cluster.componentsAlg.distanceFunctions import distanceA2AEuclideanSquared
 

@@ -18,7 +18,10 @@ __email__ = "contacto@rise-group.org"
 #QUITAR
 #import clusterpy
 import numpy as nm
-from gurobipy import *
+try:
+    from gurobipy import *
+except ImportError:
+    pass
 import time as tm
 
 from componentsAlg.distanceFunctions import distanceA2AEuclideanSquared
