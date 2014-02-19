@@ -27,4 +27,3 @@ if "rimaps" in folders:
         from rimaps import *
         rimapsActive = True
 
-__all__ = clus.__all__ + ssts.__all__ 

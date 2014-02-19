@@ -9,7 +9,7 @@ __email__ = "contacto@rise-group.org"
 
 from rimaps import rimap
 from statistics import topoStatistics, noFrontiersW
-from mrpolygons import mrpolygon, polarPolygon2cartesian
+from mrpolygons import mrpolygon
 
-__all__ = ['rimap','topoStatistics','noFrontiersW','mrpolygon']
+__all__ = ['rimap', 'topoStatistics', 'noFrontiersW', 'mrpolygon']
 
