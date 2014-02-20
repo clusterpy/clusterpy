@@ -14,4 +14,4 @@ __all__ = ['Layer', 'new', 'load', 'importArcData', 'createHexagonalGrid',
 
 from inputs import *
 from layer import Layer
-import contiguity
+from contiguity import *

@@ -11,8 +11,6 @@ __email__ = "contacto@rise-group.org"
 rimapsActive = False
 import os
 import sys
-import cluster as clus
-import sstats as ssts
 from cluster import * 
 from sstats import *
 
@@ -23,7 +21,5 @@ if "rimaps" in folders:
         import scipy
     except:
         pass
-    else:
-        from rimaps import *
-        rimapsActive = True
-
+    from rimaps import *
+    rimapsActive = True

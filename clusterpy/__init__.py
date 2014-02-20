@@ -2,7 +2,6 @@
 print "ClusterPy: Library of spatially constrained clustering algorithms"
 
 from core import *
-from core import contiguity
 
 __all__ = ['rimap','Layer','new','load','importArcData','createGrid',
            'createPoints','importShape','importDBF','importCSV','CPhelp']
