@@ -352,8 +352,6 @@ class Layer():
         names = ["sl_" + x  for x in variables]
         self.addVariable(names,lags)
 
-        
-    
     def generateData(self, process, wtype, n, *args, **kargs):
         """Simulate data according to a specific stochastic process
         

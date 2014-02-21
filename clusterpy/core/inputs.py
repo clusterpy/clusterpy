@@ -104,7 +104,6 @@ def new():
     layer = Layer()
     print "Done"
     return layer
-    
 
 def load(filename):
     """Load a ClusterPy project (<file>.CP)
@@ -267,7 +266,6 @@ def createHexagonalGrid(nRows, nCols, lowerLeft=(0,0), upperRight=(100,100)):
         import clusterpy
         points = clusterpy.createGrid(10,10)
     
-
     Create a grid of ten by ten points on the bounding box (0,0,100,100).::
 
         import clusterpy
@@ -336,7 +334,6 @@ def createGrid(nRows, nCols, lowerLeft=None, upperRight=None):
 
         import clusterpy
         points = clusterpy.createGrid(10,10)
-    
 
     Create a grid of ten by ten points on the bounding box (0,0,100,100).::
 
@@ -703,8 +700,6 @@ def importCSV(filename,header=True,delimiter=","):
             Y[i] = appY
     return (Y, fieldnames)
 
-
-
 def importGWT(filename,initialId=1):
     """Get the a neighborhood structure from a GWT file.
     
@@ -740,5 +735,3 @@ def importGWT(filename,initialId=1):
             raise NameError("File structure is not from a GWT file")
     return w        
 
-
-    

@@ -1,6 +1,4 @@
-Cython
 numpy
-wsgiref
 nose
 scipy
 Polygon2
