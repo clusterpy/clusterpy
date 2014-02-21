@@ -3,8 +3,6 @@ print "ClusterPy: Library of spatially constrained clustering algorithms"
 
 from core import *
 
-__all__ = ['rimap','Layer','new','load','importArcData','createGrid',
-           'createPoints','importShape','importDBF','importCSV','CPhelp']
 __author__ = "Juan C. Duque (Owner), Boris Dev, Alejandro Betancourt, Jose L. Franco, Andres Cano"
 __credits__ = "Copyright (c) 2010-11 Juan C. Duque"
 __license__ = "New BSD License"

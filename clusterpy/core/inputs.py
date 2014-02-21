@@ -8,26 +8,18 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 __all__ = ['new','load','importArcData','createPoints','createHexagonalGrid',
-           'createGrid','importDBF','importCSV','importShape','importGWT','rimap']
-    
+           'createGrid','importDBF','importCSV','importShape','importGWT']
+
 import struct
 import cPickle
 import re
 from contiguity import weightsFromAreas, fixIntersections
 from layer import Layer
 try:
-    import Polygon
+    from toolboxes import rimap as rim
+    __all__ += ['rimap']
 except:
     pass
-    print "Irregular maps creator is not available because Polygon is not installed"
-else:
-    try:
-        import scipy
-    except:
-        pass
-        print "Irregular maps creator is not available because scipy is not installed"
-    else:
-        from toolboxes import rimap as rim
 
 # INDEX
 # new

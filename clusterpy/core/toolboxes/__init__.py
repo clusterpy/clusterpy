@@ -17,9 +17,8 @@ from sstats import *
 folders = os.listdir(os.path.split(__file__)[0])
 if "rimaps" in folders:
     try:
-        import Polygon
-        import scipy
-    except:
-        pass
-    from rimaps import *
-    rimapsActive = True
+        from rimaps import *
+        rimapsActive = True
+    except Exception as e:
+        print "Some functions are not available, reason:", e
+

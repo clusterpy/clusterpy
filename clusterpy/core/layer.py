@@ -57,8 +57,11 @@ from toolboxes import similarityCoef
 
 
 # Irregular Maps
-from toolboxes import topoStatistics
-from toolboxes import noFrontiersW
+try:
+    from toolboxes import topoStatistics
+    from toolboxes import noFrontiersW
+except:
+    pass
 
 # Spatial statistics
 from toolboxes import globalInequalityChanges
