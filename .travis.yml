@@ -20,3 +20,6 @@ install:
   - pip install matplotlib
 
 script:  nosetests
+
+notifications:
+  email: false
