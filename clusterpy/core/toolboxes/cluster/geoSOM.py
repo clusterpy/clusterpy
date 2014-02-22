@@ -16,7 +16,6 @@ path = os.path.split(path)[0]
 sys.path += [path]
 import copy
 import inputs
-import pdb
 import time as tm
 from componentsAlg import geoSomManager
 from componentsAlg import somManager

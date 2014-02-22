@@ -2,16 +2,15 @@
 print "ClusterPy: Library of spatially constrained clustering algorithms"
 
 from core import *
-from core import contiguity
 
-__all__ = ['rimap','Layer','new','load','importArcData','createGrid',
-           'createPoints','importShape','importDBF','importCSV','CPhelp']
 __author__ = "Juan C. Duque (Owner), Boris Dev, Alejandro Betancourt, Jose L. Franco, Andres Cano"
 __credits__ = "Copyright (c) 2010-11 Juan C. Duque"
 __license__ = "New BSD License"
-__version__ = "1.0.0"
+__version__ = "0.9.9"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
+
+version = __version__
 
 def CPhelp(function = ''):
     """ClusterPy's official help system

@@ -7,12 +7,6 @@ import numpy
 import os
 import sys
 import imp
-path = os.path.split(__file__)[0]
-path = os.path.split(path)[0]
-path = os.path.split(path)[0]
-path = os.path.split(path)[0]
-sys.path += [path]
-import inputs
 from contiguity import weightsFromAreas
 
 def line2pointIntersection(line,point,tol):

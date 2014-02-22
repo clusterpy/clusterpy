@@ -1,0 +1,5 @@
+import clusterpy
+lay = clusterpy.createGrid(3,3)
+lay.generateData("SAR","rook",1,0.7)
+lay.cluster('pRegionsExact',vars,p=2)
+

@@ -8,27 +8,18 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 __all__ = ['new','load','importArcData','createPoints','createHexagonalGrid',
-           'createGrid','importDBF','importCSV','importShape','importGWT','rimap']
-    
+           'createGrid','importDBF','importCSV','importShape','importGWT']
+
 import struct
 import cPickle
 import re
 from contiguity import weightsFromAreas, fixIntersections
 from layer import Layer
 try:
-    import Polygon
+    from toolboxes import rimap as rim
+    __all__ += ['rimap']
 except:
     pass
-    print "Irregular maps creator is not available because Polygon is not installed"
-else:
-    try:
-        import scipy
-    except:
-        pass
-        print "Irregular maps creator is not available because scipy is not installed"
-    else:
-        from toolboxes import rimap as rim
-
 
 # INDEX
 # new
@@ -44,7 +35,8 @@ else:
 # importDBF
 # importGWT
 
-def rimap(n,N=30,alpha=[0.01,0.3],sigma=[1.1,1.4],dt=0.1,pg=0.01,pu=0.05,su=0.315,boundary=""):
+def rimap(n, N = 30, alpha = [0.01,0.3], sigma = [1.1,1.4], dt = 0.1,
+            pg = 0.01, pu = 0.05, su = 0.315, boundary = ""):
     """Creates an irregular maps
 
         :param n: number of areas 
@@ -76,7 +68,7 @@ def rimap(n,N=30,alpha=[0.01,0.3],sigma=[1.1,1.4],dt=0.1,pg=0.01,pu=0.05,su=0.31
             lay.exportArcData("rimap_1000")
     """
 
-    rm = rim(n,N,alpha,sigma,dt,pg,pu,su,boundary)
+    rm = rim(n, N, alpha, sigma, dt, pg, pu, su, boundary)
     areas = rm.carteAreas
     areas = fixIntersections(areas)
     Wqueen,Wrook, = weightsFromAreas(areas)
@@ -112,7 +104,6 @@ def new():
     layer = Layer()
     print "Done"
     return layer
-    
 
 def load(filename):
     """Load a ClusterPy project (<file>.CP)
@@ -275,7 +266,6 @@ def createHexagonalGrid(nRows, nCols, lowerLeft=(0,0), upperRight=(100,100)):
         import clusterpy
         points = clusterpy.createGrid(10,10)
     
-
     Create a grid of ten by ten points on the bounding box (0,0,100,100).::
 
         import clusterpy
@@ -344,7 +334,6 @@ def createGrid(nRows, nCols, lowerLeft=None, upperRight=None):
 
         import clusterpy
         points = clusterpy.createGrid(10,10)
-    
 
     Create a grid of ten by ten points on the bounding box (0,0,100,100).::
 
@@ -711,8 +700,6 @@ def importCSV(filename,header=True,delimiter=","):
             Y[i] = appY
     return (Y, fieldnames)
 
-
-
 def importGWT(filename,initialId=1):
     """Get the a neighborhood structure from a GWT file.
     
@@ -748,5 +735,3 @@ def importGWT(filename,initialId=1):
             raise NameError("File structure is not from a GWT file")
     return w        
 
-
-    

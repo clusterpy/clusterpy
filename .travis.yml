@@ -1,0 +1,22 @@
+language: python
+python:
+#  - "3.3"
+  - 2.7
+#  - "2.6"
+
+virtualenv:
+  system_site_packages: true
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y python-dev
+  - sudo apt-get install -y python-numpy
+  - sudo apt-get install -y python-scipy
+  - sudo apt-get install -y python-pip
+
+install:
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then pip install --allow-external Polygon2 --allow-unverified Polygon2 Polygon2; fi
+  - pip install nose
+  - pip install matplotlib
+
+script:  nosetests

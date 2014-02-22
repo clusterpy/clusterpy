@@ -11,6 +11,7 @@ __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
 from distanceFunctions import distMethods
+import numpy as np
 
 def getObjectiveFunctionSumSquares(regionMaker,
                                    region2AreaDict,
@@ -73,9 +74,32 @@ def getObjectiveFunctionSumSquaresFast(regionMaker,
             obj += regionMaker.objDict[region]
     return obj
 
+def getObjectiveFunctionClique(regionMaker, *args):
+    """
+    Objective function computed with the distance between all the areas
+    in a region (Clique).
+    """
+    ofuncval = 0.0
+    for region in regionMaker.region2Area.values():
+        size = len(region)
+        distmatrix = np.zeros((size, size))
+
+        for iti in xrange(size):
+            areaid = region[iti]
+            areai = np.array(regionMaker.areas[areaid].data)
+            for itj in xrange(size):
+                if iti < itj:
+                    areaid = region[itj]
+                    areaj = np.array(regionMaker.areas[areaid].data)
+                    distmatrix[iti][itj] = np.linalg.norm(areai - areaj)
+
+        ofuncval += distmatrix.sum()
+    return ofuncval
+
 objectiveFunctionTypeDispatcher = {}
 objectiveFunctionTypeDispatcher["SS"] = getObjectiveFunctionSumSquares
 objectiveFunctionTypeDispatcher["SSf"] = getObjectiveFunctionSumSquaresFast
+objectiveFunctionTypeDispatcher["complete"] = getObjectiveFunctionClique
 
 def makeObjDict(regionMaker, indexData=[]):
     """

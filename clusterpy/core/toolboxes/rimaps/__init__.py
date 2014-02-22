@@ -7,9 +7,6 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-from rimaps import rimap
 from statistics import topoStatistics, noFrontiersW
-from mrpolygons import mrpolygon, polarPolygon2cartesian
-
-__all__ = ['rimap','topoStatistics','noFrontiersW','mrpolygon']
-
+from mrpolygons import mrpolygon
+from rimaps import rimap

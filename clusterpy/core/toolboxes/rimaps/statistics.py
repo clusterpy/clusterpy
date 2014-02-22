@@ -2,7 +2,6 @@ import copy
 import numpy
 from scipy.sparse import dok_matrix, linalg
 
-
 def topoStatistics(W,nWrook,regular=False):
     frontiers = list(set(W.keys()) - set(nWrook.keys()))
     nw = []
@@ -92,7 +91,6 @@ def stepFrontiers(firstArea,desiredEnd,unusedNeighbors,Wrook,Wqueen,deep):
                 break
         return result, uN    
 
-
 def noFrontiersW(Wrook,Wqueen,areas):
     def nAvailableMovements(uN,area):
         availableMovements = list(set(Wrook[area]).intersection(set(uN)))
@@ -135,4 +133,3 @@ def noFrontiersW(Wrook,Wqueen,areas):
         if not interior:
             nWrook.pop(area)
     return nWrook
-

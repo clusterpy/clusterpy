@@ -11,20 +11,14 @@ __email__ = "contacto@rise-group.org"
 rimapsActive = False
 import os
 import sys
-import cluster as clus
-import sstats as ssts
 from cluster import * 
 from sstats import *
 
 folders = os.listdir(os.path.split(__file__)[0])
 if "rimaps" in folders:
     try:
-        import Polygon
-        import scipy
-    except:
-        pass
-    else:
         from rimaps import *
         rimapsActive = True
+    except Exception as e:
+        print "Some functions are not available, reason:", e
 
-__all__ = clus.__all__ + ssts.__all__ 

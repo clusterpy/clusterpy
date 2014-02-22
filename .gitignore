@@ -3,9 +3,5 @@
 *.pyc
 *.c
 *.log
-build
-OPTIM
-PROF
 testOutputs
-log
 corec

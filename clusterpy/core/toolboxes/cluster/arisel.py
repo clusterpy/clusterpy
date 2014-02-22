@@ -13,7 +13,7 @@ from numpy import unique as npunique
 from clusterpy.core.toolboxes.cluster.componentsAlg import AreaManager
 from clusterpy.core.toolboxes.cluster.componentsAlg import ExtendedMemory
 from clusterpy.core.toolboxes.cluster.componentsAlg import RegionMaker
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 
 __all__ = ['execArisel']
 
@@ -151,7 +151,7 @@ def execArisel(y, w, pRegions, inits = 3, initialSolution = [],
     am = AreaManager(w, y, distanceType)
     extendedMemory = ExtendedMemory()
 
-    pool = Pool(processes = 16)
+    pool = Pool(processes = cpu_count())
     procs = []
 
     start = tm.time()

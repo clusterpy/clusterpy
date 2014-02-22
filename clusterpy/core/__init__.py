@@ -7,11 +7,7 @@ __license__ = "New BSD License"
 __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
-__all__ = ['Layer', 'new', 'load', 'importArcData', 'createHexagonalGrid',
-           'createGrid','createPoints','importShape',
-           'importCSV','importDBF',
-           'importGWT','rimap']
 
 from inputs import *
 from layer import Layer
-import contiguity
+from contiguity import *

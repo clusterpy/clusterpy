@@ -43,8 +43,11 @@ from toolboxes import execArisel
 from toolboxes import execAZPRTabu
 from toolboxes import execAZPSA
 from toolboxes import execAZPTabu
+from toolboxes.cluster.pRegionsExact import execPregionsExact
+from toolboxes.cluster.pRegionsExactCP import execPregionsExactCP
+from toolboxes.cluster.minpOrder import execMinpOrder
+from toolboxes.cluster.minpFlow import execMinpFlow
 from toolboxes import execMaxpTabu
-from toolboxes import execRandom
 from toolboxes import execAMOEBA
 from toolboxes import originalSOM
 from toolboxes import geoSom
@@ -54,8 +57,11 @@ from toolboxes import similarityCoef
 
 
 # Irregular Maps
-from toolboxes import topoStatistics
-from toolboxes import noFrontiersW
+try:
+    from toolboxes import topoStatistics
+    from toolboxes import noFrontiersW
+except:
+    pass
 
 # Spatial statistics
 from toolboxes import globalInequalityChanges
@@ -346,8 +352,6 @@ class Layer():
         names = ["sl_" + x  for x in variables]
         self.addVariable(names,lags)
 
-        
-    
     def generateData(self, process, wtype, n, *args, **kargs):
         """Simulate data according to a specific stochastic process
         
@@ -637,6 +641,11 @@ Name followed by = signal followed by the fieldOperations")
         * AZP-R-Tabu [Openshaw_Rao1995]_.
             * :ref:`AZP Reactive Tabu description <azprt_description>`.
             * :ref:`Using AZP reactive Tabu with clusterPy <azprt_examples>`.
+
+        ORGANIZAR QUE FUNCIONE
+        * P-regions (Exact) [Duque_Church_Middleton2009]_.
+            * :ref:`P-regions description <pregions_description>`.
+            * :ref:`Using P-regions with clusterPy <pregions_examples>`. 
 
         * Max-p-regions (Tabu) [Duque_Anselin_Rey2010]_.
             * :ref:`Max-p description <maxp_description>`.
@@ -987,7 +996,7 @@ Name followed by = signal followed by the fieldOperations")
 
         .. image:: ../_static/AZPR5.png
 
-        .. _maxp_examples:
+        .. _lamaxp_examples:
 
         **MAX-P**
         
@@ -1175,7 +1184,7 @@ Name followed by = signal followed by the fieldOperations")
             std = kargs.pop('std')
         else:
             std = 0
-        # Setting dissolve acording to requirement
+        # Setting dissolve according to requirement
         if kargs.has_key("dissolve"):
             dissolve = kargs.pop('dissolve')
         else:
@@ -1205,8 +1214,8 @@ algorithm"
                     std_value = numpy.std(values)
                     newVar = fieldOperation("( " + name + " - " + str(mean_value) + ")/float(" + str(std_value) + ")", algorithmY, fieldNames)
                     for nv,val in enumerate(newVar):
-                        algorithmY[nv][nn] = val
-                # Adding original popupation to de algortihmY
+						algorithmY[nv][nn] = val
+                # Adding original population to de algortihmY
                 if algorithm == "maxpTabu":
                     population = fieldNames[-1]
                     populationY = self.getVars(population)
@@ -1215,19 +1224,23 @@ algorithm"
             args = (algorithmY,algorithmW) + args[3:]
         name = algorithm + "_" +  time.strftime("%Y%m%d%H%M%S")
         self.outputCluster[name] = {
-            "random": lambda *args, **kargs: execRandom(*args, **kargs), 
-            "azp": lambda *args, **kargs: execAZP(*args, **kargs), 
-            "arisel": lambda *args, **kargs: execArisel(*args, **kargs), 
-            "azpTabu": lambda *args, **kargs: execAZPTabu(*args, **kargs), 
+            "random": lambda *args, **kargs: execRandom(*args, **kargs),
+            "azp": lambda *args, **kargs: execAZP(*args, **kargs),
+            "arisel": lambda *args, **kargs: execArisel(*args, **kargs),
+            "azpTabu": lambda *args, **kargs: execAZPTabu(*args, **kargs),
             "azpRTabu": lambda *args, **kargs: execAZPRTabu(*args, **kargs),
             "azpSa": lambda *args, **kargs: execAZPSA(*args, **kargs),
-            "maxpTabu": lambda *args, **kargs: execMaxpTabu(*args, **kargs),
             "amoeba": lambda *args, **kargs: execAMOEBA(*args, **kargs),
             "som": lambda *args, **kargs: originalSOM(*args, **kargs),
             "geoSom": lambda *args, **kargs: geoSom(*args, **kargs),
+            "pRegionsExact": lambda *args, **kargs: execPregionsExact(*args, **kargs),
+			"pRegionsExactCP": lambda *args, **kargs: execPregionsExactCP(*args, **kargs),
+            "minpOrder": lambda *args, **kargs: execMinpOrder(*args, **kargs),
+            "minpFlow": lambda *args, **kargs: execMinpFlow(*args, **kargs),
+			"maxpTabu": lambda *args, **kargs: execMaxpTabu(*args, **kargs)
         }[algorithm](*args, **kargs)
-        self.outputCluster[name]["aggregationVariables"] = fieldNames
         self.outputCluster[name]["weightType"] = wType
+        self.outputCluster[name]["aggregationVariables"] = fieldNames 
         self.outputCluster[name]["OS"] = os.name
         self.outputCluster[name]["proccesorArchitecture"] = os.getenv('PROCESSOR_ARCHITECTURE')
         self.outputCluster[name]["proccesorIdentifier"] = os.getenv('PROCESSOR_IDENTIFIER')
