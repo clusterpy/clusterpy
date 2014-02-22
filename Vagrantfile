@@ -1,14 +1,19 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-
-Vagrant::Config.run do |config|
+Vagrant.configure("2") do |config|
   config.vm.box = "base"
-  requirements = [ "git-core", "python-dev", "python-numpy", "python-scipy", "python-nose","python-pip", "python-matplotlib"]
-  _apt_get = ["sudo apt-get update;"]
-  _apt_get += ["sudo apt-get install -y", requirements.join(" ")]
-  config.vm.provision :shell, :inline => _apt_get.join(" ")
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
-  _apt_get = ["/usr/bin/pip", "install", "Polygon2"]
-  config.vm.provision :shell, :inline => _apt_get.join(" ")
+$requirements = <<END
+sudo apt-get update -qq
+sudo apt-get install -y git-core
+sudo apt-get install -y python-dev python-numpy
+sudo apt-get install -y python-scipy
+sudo apt-get install -y python-nose python-pip python-matplotlib
+END
+  config.vm.provision :shell, :inline => $requirements
+
+  pipinstall = "/usr/bin/pip install Polygon2"
+  config.vm.provision :shell, :inline => pipinstall
 
 end
