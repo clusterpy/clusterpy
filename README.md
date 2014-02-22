@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/sergiobuj/clusterpy.png?branch=master)](https://travis-ci.org/sergiobuj/clusterpy)
+
 ClusterPy
 =========
 
