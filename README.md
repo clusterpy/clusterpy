@@ -51,10 +51,10 @@ Special Features
 
 Related information
 ===================
-  * [Contribution guide](wiki/Contribution)
-  * [Installation guide](wiki/Installation)
+  * [Contribution guide](https://github.com/sergiobuj/clusterpy/wiki/Contribution)
+  * [Installation guide](https://github.com/sergiobuj/clusterpy/wiki/Installation)
   * [Documentation](http://www.rise-group.org/risem/clusterpy/index.html)
-  * [Development team](wiki/Team)
+  * [Development team](https://github.com/sergiobuj/clusterpy/wiki/Team)
 
 Citing Clusterpy
 ================
