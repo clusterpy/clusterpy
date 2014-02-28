@@ -11,3 +11,5 @@ __email__ = "contacto@rise-group.org"
 from inputs import *
 from layer import Layer
 from contiguity import *
+from viz import showshape
+from viz import showshapes

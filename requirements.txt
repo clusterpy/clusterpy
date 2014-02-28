@@ -2,3 +2,4 @@ numpy
 nose
 scipy
 Polygon2
+matplotlib
