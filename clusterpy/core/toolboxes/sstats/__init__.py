@@ -14,9 +14,12 @@ from inequality import inequalityMultivar
 from inequality import globalInequalityChanges
 from inequality import interregionalInequalityTest
 from inequality import interregionalInequalityDifferences
+from indexes import areaChangeIndex
+from indexes import translationLocalIndex
+from indexes import translationGlobalIndex
 
 __all__ = ['geoAssociationCoef', 'redistributionCoef',
            'similarityCoef','inequalityMultivar','globalInequalityChanges',
-           'interregionalInequalityTest',
-           'interregionalInequalityDifferences']
+           'interregionalInequalityTest', 'interregionalInequalityDifferences',
+           'areaChangeIndex', 'translationLocalIndex', 'translationGlobalIndex']
 
