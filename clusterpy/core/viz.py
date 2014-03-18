@@ -1,12 +1,32 @@
 def showshape(shape, colorarray=None, colormap=None, alpha=None):
   """
   Creates and displays a firgure for the given shape using Matplotlib
+  Parameters:
+    [Shape] is a Clusterpy layer.
+    [colorarray] is an array, with the same number of elements as areas in the
+      layer, that is used to categorize the areas and set the color according to
+      the value.
+    [colormap] a string representing a Matplotlib's cmap name.
+    [alpha] the alpha for the colors.
+
+  Returns:
+    A Matplotlib's figure.
   """
   return showshapes([shape], colorarray, colormap, alpha)
 
 def showshapes(shapes, colorarray=None, colormap=None, alpha=None):
   """
   Creates and displays in a grid the group of shapes given.
+  Parameters:
+    [Shapes] a list of Clusterpy layers.
+    [colorarray] is an array, with the same number of elements as areas in the
+      layers, that is used to categorize the areas and set the color according to
+      the value.
+    [colormap] a string representing a Matplotlib's cmap name.
+    [alpha] the alpha for the colors.
+
+  Returns:
+    A Matplotlib's grid of figures.
   """
   try:
     import matplotlib.patches as pts
