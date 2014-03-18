@@ -1,10 +1,10 @@
-def showshape(shape):
+def showshape(shape, colorarray=None, colormap=None, alpha=None):
   """
   Creates and displays a firgure for the given shape using Matplotlib
   """
-  return showshapes([shape])
+  return showshapes([shape], colorarray, colormap, alpha)
 
-def showshapes(shapes):
+def showshapes(shapes, colorarray=None, colormap=None, alpha=None):
   """
   Creates and displays in a grid the group of shapes given.
   """
@@ -12,10 +12,9 @@ def showshapes(shapes):
     import matplotlib.patches as pts
     import matplotlib.pyplot as plt
     import numpy as np
-    from matplotlib.cm import jet
     from matplotlib.collections import PatchCollection
   except ImportError:
-    print "Matplotlib's pyplot or patches not found."
+    print "Matplotlib's pyplot patches and/or collections not found."
     return
 
   num_figs = len(shapes)
@@ -40,8 +39,19 @@ def showshapes(shapes):
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
 
-    colors = 100*np.random.rand(len(patches))
-    pcoll = PatchCollection(patches, cmap=jet, alpha=0.4)
+    cmap = plt.get_cmap('jet') if colormap is None else plt.get_cmap(colormap)
+    calpha = 0.4 if alpha is None else alpha
+    colors = []
+    areas_count = len(patches)
+
+    if colorarray is None:
+      colors = 100 * np.random.rand(areas_count)
+    else:
+      if len(colorarray) != areas_count:
+        raise Exception("The colorarray has to specify a value for one and only one area")
+      colors = colorarray
+
+    pcoll = PatchCollection(patches, cmap=cmap, alpha=calpha)
     pcoll.set_array(np.array(colors))
     ax.add_collection(pcoll)
     ax.set_xticks([])
