@@ -5,10 +5,10 @@ try:
   import numpy
   import scipy
 except ImportError:
-  sys.exit("install requires: 'numpy', 'scipy'")
+  sys.exit("install requires: 'numpy', 'scipy'" +
+    "optional packages: 'matplotlib', 'Polygon2'")
 
-# Polygon2 is actually optional
-install_requires = ['numpy', 'scipy', 'Polygon2']
+install_requires = ['numpy', 'scipy', 'matplotlib', 'Polygon2']
 test_requires = ['nose']
 
 setup(name = 'clusterpy',
