@@ -3,7 +3,7 @@ import sys
 
 try:
   import numpy
-  import dateutil
+  import scipy
 except ImportError:
   sys.exit("install requires: 'numpy', 'scipy'")
 
