@@ -106,6 +106,20 @@ class TestMaxPTabu(TestCase):
 
         self.assertTrue(initial_obj_func >= final_obj_func)
 
+    @attr('slow')
+    def test_maxpt_min_num_areas_in_region_threshold(self):
+        instance = self.map_instance
+        from collections import Counter as cnt
+
+        instance.dataOperation("CONSTANTS = 1")
+
+        thresholds = [5, 8, 13, 21, 34]
+
+        for threshold in thresholds:
+            instance.cluster('maxpTabu', ['CONSTANTS'], threshold=threshold)
+            region_size = cnt(instance.region2areas).values()
+            self.assertTrue(all(item >= threshold for item in region_size))
+
 class TestAZPalgorithms(TestCase):
     """ Tests for AZP, AZPrTabu, AZPSA """
     def setUp(self):
@@ -221,4 +235,3 @@ class TestAZPalgorithms(TestCase):
         ob_after = rm.objInfo
 
         self.assertTrue(ob_before >= ob_after)
-
