@@ -43,6 +43,7 @@ from toolboxes import execArisel
 from toolboxes import execAZPRTabu
 from toolboxes import execAZPSA
 from toolboxes import execAZPTabu
+from toolboxes import execRandom
 from toolboxes.cluster.pRegionsExact import execPregionsExact
 from toolboxes.cluster.pRegionsExactCP import execPregionsExactCP
 from toolboxes.cluster.minpOrder import execMinpOrder
