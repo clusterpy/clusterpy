@@ -170,7 +170,7 @@ def execMaxpTabu(y, w, threshold=100.0, maxit=2, tabuLength=5, typeTabu="exact")
         #  LOCAL SEARCH
 
         rm.calcObj()
-        convTabu = max(10,len(y)/maxP)  #   convTabu=230*numpy.sqrt(maxP)
+        convTabu = min(10,len(y)/maxP)  #   convTabu=230*numpy.sqrt(maxP)
 
         #  print "###ENTERING TABU",rm.objInfo,rm.returnRegions()
 
