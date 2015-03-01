@@ -9,7 +9,7 @@ __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
 import time as tm
-from numpy import unique as npunique
+import numpy as np
 from clusterpy.core.toolboxes.cluster.componentsAlg import AreaManager
 from clusterpy.core.toolboxes.cluster.componentsAlg import ExtendedMemory
 from clusterpy.core.toolboxes.cluster.componentsAlg import RegionMaker
@@ -132,7 +132,7 @@ def execArisel(y, w, pRegions, inits = 3, initialSolution = [],
     print "Running original Arisel algorithm"
     print "Number of areas: ", lenY
     if initialSolution:
-        print "Number of regions: ", len(npunique(initialSolution))
+        print "Number of regions: ", len(np.unique(initialSolution))
         pRegions = len(set(initialSolution))
     else:
         print "Number of regions: ", pRegions

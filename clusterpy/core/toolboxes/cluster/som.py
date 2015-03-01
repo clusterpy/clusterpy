@@ -29,9 +29,9 @@ def originalSOM(y,w,
         initialDistribution='Uniform',
         wType='rook',
         fileName=None):
-    """Self Organizing Map(SOM) 
+    """Self Organizing Map(SOM)
 
-    SOM is an unsupervised neural network proposed by [Kohonen1990]_ 
+    SOM is an unsupervised neural network proposed by [Kohonen1990]_
     which adjust its weights to represent, on a regular lattice, a data set
     distribution.
 
@@ -49,23 +49,23 @@ def originalSOM(y,w,
 
         layer.cluster('som',vars,<nRows>,<nCols>,<wType>,<iters>,<alphaType>,<initialDistribution>,<wType>,<fileName>)
 
-    :keyword vars: Area attribute(s) 
+    :keyword vars: Area attribute(s)
     :type vars: list
-    
-    :keyword nRows: Number of rows in the lattice 
+
+    :keyword nRows: Number of rows in the lattice
     :type nRows: list
-    
+
     :keyword nCols: Number of columns in the lattice
     :type nCols: list
-    
-    :keyword wType: Type of first-order contiguity-based spatial matrix: 'rook' or 'queen'. Default value wType = 'rook'. 
+
+    :keyword wType: Type of first-order contiguity-based spatial matrix: 'rook' or 'queen'. Default value wType = 'rook'.
     :type wType: string
 
     :keyword iters: Number of iterations for the SOM algorithm. Default value iters = 1000.
     :type iters: integer
 
     :keyword alphaType: Name of the scalar-valued decreasing function which maps iterations onto (0,1) float values. This function is used to define how much modify the BMU neighborhood areas. In clusterPy we have to possible functions: 'linear' (linear decreasing function), or 'quadratic' (quadratic decreasing function). Default value alphaType = 'linear'.
-    :type alphaType: string 
+    :type alphaType: string
 
     :keyword initialDistribution: Data generator process to initialize the neural wights. Default value initialDistribution = 'uniform'.
     :type initialDistribution: string
@@ -73,8 +73,8 @@ def originalSOM(y,w,
     :keyword fileName: Parameter used to export neural output layer topology as a shapefile. Default value fileName = None.
     :type fileName: string
 
-    IMPORTANT NOTE: 
-    
+    IMPORTANT NOTE:
+
     Since this algorithm does not guarantee spatial contiguity of the
     resulting regions, clusterPy does not provide the dissolve option. to
     obtain the solution vector you will need to export the layer with the
@@ -84,7 +84,7 @@ def originalSOM(y,w,
     """
     print "Original Self Organizing Maps"
     start = tm.time()
-    print "---Generating SOM topology---" 
+    print "---Generating SOM topology---"
     oLayer = inputs.createGrid(nRows, nCols)
     manager = somManager(y,
                  iters,

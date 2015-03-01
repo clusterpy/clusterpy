@@ -10,9 +10,7 @@ __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
 from copy import deepcopy
-from numpy import exp as npexp, identity as npidentity, matrix as npmatrix
-from numpy import ones as npones, power as nppower, random as nprandom
-from numpy import sort as npsort, zeros as npzeros
+import numpy as np
 from objFunctions import makeObjDict, objectiveFunctionTypeDispatcher
 from selectionTypeFunctions import selectionTypeDispatcher
 from warnings import warn
@@ -185,7 +183,7 @@ class RegionMaker:
                     c += 1
             self.setSeeds(seeds)
             while len(self.unassignedAreas) != 0:
-                nprandom.shuffle(self.unassignedAreas)
+                np.random.shuffle(self.unassignedAreas)
                 vals = []
                 for index in self.unassignedAreas:
                     vals += [self.areas[index].thresholdVar]
@@ -226,7 +224,7 @@ class RegionMaker:
 
                 #  select seed
 
-                nprandom.shuffle(self.unassignedAreas)
+                np.random.shuffle(self.unassignedAreas)
                 seed = self.unassignedAreas[0]
                 self.setSeeds([seed],c)
 
@@ -275,15 +273,15 @@ class RegionMaker:
         cachedDistances = {}
         y = self.am.y
         n = len(y)
-        distances = npones(n)
+        distances = np.ones(n)
         total = sum(distances)
         probabilities = map(lambda x: x / float(total), distances)
         seeds = []
         localDistanceType = self.distanceType
         returnDistance2Area = AreaCl.returnDistance2Area
-        nprandom.seed(int(time() * getpid()) % 4294967295)
+        np.random.seed(int(time() * getpid()) % 4294967295)
         for k in xrange(self.pRegions):
-            random = nprandom.uniform(0, 1)
+            random = np.random.uniform(0, 1)
             find = False
             acum = 0
             cont = 0
@@ -350,7 +348,7 @@ class RegionMaker:
         Return regions created
         """
         areasId = self.area2Region.keys()
-        areasId = npsort(areasId).tolist()
+        areasId = np.sort(areasId).tolist()
         return [self.area2Region[area] for area in areasId]
 
     def resetNow(self):
@@ -374,7 +372,7 @@ class RegionMaker:
         if self.numRegionsType == "Exogenous" and len(seeds) <= self.pRegions:
             idx = range(self.n)
             didx = list((set(idx) - set(seeds)) - self.am.noNeighs)
-            nprandom.shuffle(didx)
+            np.random.shuffle(didx)
             self.seeds = seeds + didx[0:(self.pRegions - len(seeds))]
         else:
             self.seeds = seeds
@@ -585,7 +583,7 @@ class RegionMaker:
         indices = indexMultiple(candidates, 1)
         nCandidates = len(indices)
         idx = range(nCandidates)
-        nprandom.shuffle(idx)
+        np.random.shuffle(idx)
         random = idx[0]
         index4Grasp = indices[random]
         return index4Grasp
@@ -647,7 +645,7 @@ class RegionMaker:
         return distance
 
     def getLambda(self):
-        L = npmatrix(npidentity(self.pRegions))
+        L = np.matrix(np.identity(self.pRegions))
         for r in range(self.pRegions):
             L[r, r] = 1.0 * self.NRegion[r] / self.N
         return L
@@ -656,7 +654,7 @@ class RegionMaker:
         """
         Return matrix of parameters of all regions
         """
-        B = npmatrix(npzeros(len(self.data[0]) * self.pRegions)).T
+        B = np.matrix(np.zeros(len(self.data[0]) * self.pRegions)).T
         index = 0
         for r in range(self.pRegions):
             for i in range(len(self.data[0])):
@@ -668,19 +666,19 @@ class RegionMaker:
         """
         Return matrix of the average variance-covariance of all regions
         """
-        Y = npmatrix(npidentity(len(self.data[0])))
+        Y = np.matrix(np.identity(len(self.data[0])))
         centroids = {}
         for r in range(self.pRegions):
             centroids[r] = calculateCentroid([self.areas[aID] for aID in self.region2Area[r]])
         for r in range(self.pRegions):
-            Y += centroids[r].var * nppower(self.NRegion[r] / self.N, 2)
+            Y += centroids[r].var * np.power(self.NRegion[r] / self.N, 2)
         return Y
 
     def getH(self):
         """
         Return composite matrix
         """
-        E = npmatrix(npones((1, self.pRegions, self.pRegions)))
+        E = np.matrix(np.ones((1, self.pRegions, self.pRegions)))
         L = self.getLambda()
         H = L - L * E * L
         return H
@@ -875,7 +873,7 @@ class RegionMaker:
             else:
                 sortedk = sortedKeys(self.neighSolutions)
                 if typeGreedy == "exact":
-                    move = sortedk[nprandom.randint(0, len(sortedk))]
+                    move = sortedk[np.random.randint(0, len(sortedk))]
                     area, region = move
                 else:
                     values = self.neighSolutions.values()
@@ -883,7 +881,7 @@ class RegionMaker:
                     indicesMin = indexMultiple(values, minVal)
                     nInd = len(indicesMin)
                     idx = range(nInd)
-                    nprandom.shuffle(idx)
+                    np.random.shuffle(idx)
                     minIndex = indicesMin[idx[0]]
                     area,region = self.neighSolutions.keys()[minIndex]
                 self.moveArea(area, region)
@@ -945,7 +943,7 @@ class RegionMaker:
                         region2AreaCopy = deepcopy(self.region2Area)
                         area2RegionCopy = deepcopy(self.area2Region)
                         while (candidate == 0 and len(moves) > 0):
-                            move = moves[nprandom.randint(0, len(moves))]
+                            move = moves[np.random.randint(0, len(moves))]
                             moves.remove(move)
                             area, region = move
                             run += 1
@@ -1037,7 +1035,7 @@ class RegionMaker:
                 # step 3
 
                 if len(regions) > 1:
-                    randomRegion = nprandom.randint(0, len(regions))
+                    randomRegion = np.random.randint(0, len(regions))
                 else:
                     randomRegion = 0
                 region = regions[randomRegion]
@@ -1051,7 +1049,7 @@ class RegionMaker:
 
                     # step 5
 
-                    randomArea = nprandom.randint(0, len(borderingAreas))
+                    randomArea = np.random.randint(0, len(borderingAreas))
                     area = borderingAreas[randomArea]
                     borderingAreas.remove(area)
                     posibleMove = list(self.intraBorderingAreas[area])
@@ -1114,7 +1112,7 @@ class RegionMaker:
                 #  step 3
 
                 if len(regions) > 1:
-                    randomRegion = nprandom.randint(0, len(regions) - 1)
+                    randomRegion = np.random.randint(0, len(regions) - 1)
                 else:
                     randomRegion = 0
                 region = regions[randomRegion]
@@ -1128,7 +1126,7 @@ class RegionMaker:
 
                     # step 5
 
-                    randomArea = nprandom.randint(0, len(borderingAreas))
+                    randomArea = np.random.randint(0, len(borderingAreas))
                     area = borderingAreas[randomArea]
                     borderingAreas.remove(area)
                     posibleMove = list(self.intraBorderingAreas[area])
@@ -1157,9 +1155,9 @@ class RegionMaker:
                                 borderingAreas = list(set(self.returnBorderingAreas(region)) & set(self.region2Area[region]))
                                 break
                             else:
-                                random = nprandom.rand(1)[0]
+                                random = np.random.rand(1)[0]
                                 totalMoves += 1
-                                if (npexp(-(obj - currentOBJ) / (currentOBJ * temperature))) > random:
+                                if (np.exp(-(obj - currentOBJ) / (currentOBJ * temperature))) > random:
                                     acceptedMoves += 1
                                     self.moveArea(area, move)
                                     self.objInfo = obj
@@ -1186,7 +1184,7 @@ class RegionMaker:
         region2AreaAspire = deepcopy(self.region2Area)
         area2RegionAspire = deepcopy(self.area2Region)
         currentRegions = deepcopy(aspireRegions)
-        tabuList = npzeros(tabuLength)
+        tabuList = np.zeros(tabuLength)
         tabuList = tabuList.tolist()
         cBreak = []
         c = 1
@@ -1262,7 +1260,7 @@ class RegionMaker:
         #  step 2
 
         tabuLength = 1
-        tabuList = npzeros(tabuLength)
+        tabuList = np.zeros(tabuLength)
         tabuList = tabuList.tolist()
         rAvg = 1
         K1 = 3
@@ -1346,7 +1344,7 @@ class RegionMaker:
                         self.objDict = makeObjDict(self)
                         self.allCandidates()
                         moveIndex = range(len(self.neighSolutions))
-                        nprandom.suffle(moveIndex)
+                        np.random.suffle(moveIndex)
                         for move in moveIndex[0:int(1 + 0.5 * rAvg)]:
                             area, region = move
                             obj4Move = self.neighSolutions[move]

@@ -9,7 +9,7 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-from numpy import random as nprandom
+import numpy as np
 from random import randint
 
 def minimumSelection(RegionMaker):
@@ -34,7 +34,7 @@ def minimumSelection(RegionMaker):
         # random selection for ties
         #indicesMin = [ l[0] for l in enumerate(values) if l[1] == minVal ]
         indicesMin = []
-        minVal =  float('Inf')   
+        minVal =  float('Inf')
         for it, key in enumerate(keys):
             val = RegionMaker.candidateInfo[key]
             if val < minVal:
@@ -44,7 +44,7 @@ def minimumSelection(RegionMaker):
             elif val == minVal:
                 indicesMin.append(it)
                 nInd += 1
-        
+
         idx = randint(0, nInd - 1)
         minIndex = indicesMin[idx]
         aid = keys[minIndex][0]
@@ -59,15 +59,15 @@ def fullRandom(RegionMaker):
     """
     Select and assign randomly an area
     """
-    keys = RegionMaker.candidateInfo.keys() 
+    keys = RegionMaker.candidateInfo.keys()
     values = [ RegionMaker.candidateInfo[i] for i in keys ]
     if len(values) > 0:
-        randomIndex = nprandom.randint(0, len(values))
+        randomIndex = np.random.randint(0, len(values))
         aid,rid = keys[randomIndex]
         [RegionMaker.candidateInfo.pop(key) for key in keys if key[0] == aid]
         RegionMaker.assignArea(aid, rid)
 
- 
+
 def indexMultiple(x,value):
     """
     Return indexes in x with multiple values.
@@ -79,4 +79,3 @@ def indexMultiple(x,value):
 selectionTypeDispatcher = {}
 selectionTypeDispatcher["Minimum"] = minimumSelection
 selectionTypeDispatcher["FullRandom"] = fullRandom
-

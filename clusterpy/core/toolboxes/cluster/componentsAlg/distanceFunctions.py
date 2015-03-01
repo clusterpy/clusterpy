@@ -9,7 +9,7 @@ __version__ = "1.0.0"
 __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
-from numpy import add as npadd, array as nparray, subtract as npsubtract
+import numpy as np
 
 def square_double(x):
     ans = 0.0
@@ -23,12 +23,12 @@ def distanceA2AEuclideanSquared(x, std=[], w=[]):
     two or more variables.
     """
     if std:
-        x = nparray(x)
+        x = np.array(x)
         x = stdobs(x)  #  standardize
         x = x.tolist()
     if w:
-        x = nparray(x)
-        w = w / float(npadd.reduce(w))
+        x = np.array(x)
+        w = w / float(np.add.reduce(w))
         x = x * w  #  weights
         x = x.tolist()
 
@@ -36,7 +36,7 @@ def distanceA2AEuclideanSquared(x, std=[], w=[]):
     distance = [0]*(numrows-1)
 
     for row in xrange(numrows - 1):
-        npsublist = npsubtract(x[row], x[row + 1])
+        npsublist = np.subtract(x[row], x[row + 1])
         sublist = npsublist.tolist()
         distance[row] = [square_double(sublist)]
 

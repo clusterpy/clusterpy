@@ -10,7 +10,7 @@ __maintainer__ = "RiSE Group"
 __email__ = "contacto@rise-group.org"
 
 from clusterpy.core.toolboxes.cluster.componentsAlg.distanceFunctions import distMethods
-from numpy import sqrt as npsqrt, matrix as npmatrix, identity as npidentity
+import numpy as np
 
 class AreaCl:
     """
@@ -35,8 +35,8 @@ class AreaCl:
         if variance == "false":
             self.data = data
         else:
-            n = (npsqrt(9 + 8 * (len(data) - 1)) - 3) / 2
-            self.var = npmatrix(npidentity(n))
+            n = (np.sqrt(9 + 8 * (len(data) - 1)) - 3) / 2
+            self.var = np.matrix(np.identity(n))
             index = n + 1
             for i in range(int(n)):
                 for j in range(i + 1):
@@ -67,4 +67,3 @@ class AreaCl:
         except:
             dist = areaDistance[0]
         return dist
-
