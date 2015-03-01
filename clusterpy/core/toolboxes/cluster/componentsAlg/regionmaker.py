@@ -281,7 +281,7 @@ class RegionMaker:
         seeds = []
         localDistanceType = self.distanceType
         returnDistance2Area = AreaCl.returnDistance2Area
-        nprandom.seed(int(time() * getpid()))
+        nprandom.seed(int(time() * getpid()) % 4294967295)
         for k in xrange(self.pRegions):
             random = nprandom.uniform(0, 1)
             find = False
